@@ -1,0 +1,17 @@
+﻿content_type;prompt;prompt_name;qud;qud_type;scenes (OBS may not need these? if building in the code)
+arc;The circle, which is blue, is right of the triangle;arc-1;Where is the circle?,What colour is the circle?,What can you tell me about the shapes?;primary, secondary, both;arc-1-tt-1,arc-1-tt-2,arc-1-tt-3
+arc;The square, which is orange, is left of the circle;arc-2;;;arc-2-tt-1,arc-2-tt-2,arc-2-tt-3
+arc;The triangle, which is left of the square, is yellow;arc-3;;;arc-3-tt-1,arc-3-tt-2,arc-3-tt-3
+con;;con-1;;;
+con;;con-2;;;
+con;;con-3;;;
+ps_ex;;ps_ex-1;;;
+ps_ex;;ps_ex-2;;;
+ps_ex;;ps_ex-3;;;
+ps_un;;ps_un-1;;;
+ps_un;;ps_un-2;;;
+ps_un;;ps_un-3;;;
+;;;;;
+;;;;;
+if doing only one of each, then filenames should be:;;;;;
+arc-tt, arc-tf, arc-ft, arc-ff, con-tt, con-tf, and so on;;;;;

@@ -1,0 +1,48 @@
+#iamc-grid-top {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 2fr;
+}
+
+#iamc-grid-image-0 {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+#iamc-grid-image-1 {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+}
+
+#iamc-grid-image-2 {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+}
+
+#iamc-grid-image-3 {
+    grid-column: 2 / 3;
+    grid-row: 2 / 3;
+}
+
+.iamc-grid-image {
+    height: 200px;
+    width: 200px;
+
+    border: 1px solid black;
+}
+
+#iamc-grid-image-highlighted {
+    border: 5px solid green;
+}
+
+#iamc-rhs {
+    grid-column: 3 / 4;
+    grid-row: 1 / 3;
+
+    text-align: left;
+    margin-left: 50px;
+}
+
+.iamc-option {
+    width: 100%;
+}

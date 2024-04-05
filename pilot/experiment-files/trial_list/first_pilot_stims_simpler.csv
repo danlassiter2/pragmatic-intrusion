@@ -1,0 +1,7 @@
+﻿content_type;prompt;prompt_name;scenes;;;OBS may not need these?
+con;The square is orange and is left of the circle;con;con-tt,con-tf,con-ft,con-ff;;;
+arc;The circle, which is blue, is right of the triangle;arc;arc-tt,arc-tf,arc-ft,arc-ff;;;
+ana;The triangle is blue too;ana;ana-tt,ana-tf,ana-ft,ana-ff;;;
+def_ex;The yellow circle is next to the triangle;def_ex;def_ex-tt,def_ex-tf,def_ex-ft,def_ex-ff;;;
+def_un;The circle is left of the triangle;def_un;def_un-tt,def_un-tf,def_un-ft,def_un-ff;;;
+only;Only the square is orange;only;only_tt,only_tf,only_ft,only_ff;;;
