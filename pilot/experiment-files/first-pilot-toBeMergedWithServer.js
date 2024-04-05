@@ -307,6 +307,32 @@ var final_screen = {
 };
 
 /******************************************************************************/
+/*** Demographics survey ******************************************************/
+/******************************************************************************/
+
+var demographics_survey = {
+    type: jsPsychSurveyHtmlForm,
+    preamble:
+      "<p style='text-align:left'> <b>Demographics survey</b></p>\
+                <p style='text-align:left'> Finally, we would like to \
+                gather some background information about you. This will not be \
+                associated with any information that might identify you.</p>", 
+    html: "<p style='text-align:left'>What is your date of birth? <br> \
+                <input required name='dob' type='date'></p> \
+           <p style='text-align:left'>What is your first language?<br> \
+                <input required name='first_lang' type='text'></p> \
+            <p style='text-align:left'>Was any other language spoken \
+             in the home before the age of 6?<br>\
+                <input required name='bilingual' type='radio'><label>Yes</label> \
+                <input required name='bilingual' type='radio'><label>No</label></p> \
+            <p style='text-align:left'>If you responded yes above, \
+           which language(s)?<br>\
+              <input name='other_lang' type='text'></p>",
+  };
+
+// might want to add a check of if "Yes" to bilingual, require final question
+
+/******************************************************************************/
 /*** Build the full timeline **************************************************/
 /******************************************************************************/
 
@@ -317,6 +343,7 @@ var full_timeline = [].concat(
     preload,
     trials_shuffled,
     next_trial,
+    demographics_survey,
     final_screen
 );
 
