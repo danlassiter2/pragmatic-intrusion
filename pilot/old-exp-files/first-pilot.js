@@ -49,8 +49,6 @@ var images_to_preload = [];
 /******************************************************************************/
 
 // ADD CODE HERE, likely from W9 confederate priming
-// NOTE the version on the server has some code added, but not everything that is 
-// needed (just the save data function, not save data line by line)
 
 /******************************************************************************/
 /*** Generate a random participant ID *****************************************/
@@ -58,57 +56,6 @@ var images_to_preload = [];
 
 //var participant_id = jsPsych.randomization.randomID(10);
 // If using; see confederate priming for how to use when saving data etc.
-// other option: use Prolific ID fetching from cond code on server (pasted
-// code for this in version on the server)
-
-/******************************************************************************/
-/*** Condition assignment (between ppts) **************************************/
-/******************************************************************************/
-
-// pick a random condition for the participant at start of experiment
-var condition_assignment = jsPsych.randomization.sampleWithoutReplacement(
-    ['truth', 'acceptability', 'likelihood'], 1)[0];
-console.log(condition_assignment);
-
-// draft code to use for setting the response format when building trials. 
-// May move to just before trial building function
-// use the condition to determine the response options in the trial building function
-/*if (condition_assignment == 'likelihood') {
-    response_format = slider; // will have to add this parameter to the plugin, if even possible (ask Alisdair)
-  } else {
-    response_format = radio_buttons;
-  }
-// based on setting response options below, seems this does can be referred to as is and does 
-not need to be assigned to a variable 
-*/
-
-// Set the text and names for the response options in a trial based on condition assignment
-
-if (condition_assignment == 'truth') {
-    response_options = [  
-        {name: "true", text: "True"},
-        {name: "false", text: "False"}
-        ];
-    } else if (condition_assignment == 'acceptability') {
-    response_options = [  
-        {name: "acceptable", text: "Acceptable"},
-        {name: "unacceptable", text: "Unacceptable"}
-        ];
-    } else if (condition_assignment == 'likelihood') {
-    response_options = [  
-        {name: "likely", text: "Likely"},
-        {name: "unlikely", text: "Unlikely"}
-        ];
-    }
-console.log(response_options);
-
-/* one way to record the condition assignment in the jsPsych data, see https://www.jspsych.org/7.3/overview/data/
-// this adds a property called 'participant' and a property called 'condition' to every trial 
-jsPsych.data.addProperties({   
-    participant: participant_id,   
-    condition: condition_assignment 
-});
-*/
 
 /******************************************************************************/
 /*** Creating the trials ******************************************************/
@@ -218,11 +165,16 @@ function make_trial() {
     var trial = {
         type: jsPsychImageArrayMultiChoice,
         images: selected_scenes, 
-        preamble: "", // use this as reminder that it is only the image in the green box ppts should evaluate?
+        preamble: "", 
         prompt: target_stim.prompt,
-        options: response_options,
+        options: [  
+            {name: "true", text: "True"},
+            {name: "false", text: "False"}
+        ],
         highlighted_image_index: selected_scenes.indexOf(target_image_filename) 
     };
+    // NOTE: response options are currently manually specified. Ideally, we'd have a trial building function that has the labels (t/f,
+    // acceptable/unacceptable, likely/unlikely, etc) be determined dynamically depending on the condition (highest level of ppt allocation)
     return trial; 
 }
 
@@ -307,32 +259,6 @@ var final_screen = {
 };
 
 /******************************************************************************/
-/*** Demographics survey ******************************************************/
-/******************************************************************************/
-
-var demographics_survey = {
-    type: jsPsychSurveyHtmlForm,
-    preamble:
-      "<p style='text-align:left'> <b>Demographics survey</b></p>\
-                <p style='text-align:left'> Finally, we would like to \
-                gather some background information about you. This will not be \
-                associated with any information that might identify you.</p>", 
-    html: "<p style='text-align:left'>What is your date of birth? <br> \
-                <input required name='dob' type='date'></p> \
-           <p style='text-align:left'>What is your first language?<br> \
-                <input required name='first_lang' type='text'></p> \
-            <p style='text-align:left'>Was any other language spoken \
-             in the home before the age of 6?<br>\
-                <input required name='bilingual' type='radio'><label>Yes</label> \
-                <input required name='bilingual' type='radio'><label>No</label></p> \
-            <p style='text-align:left'>If you responded yes above, \
-           which language(s)?<br>\
-              <input name='other_lang' type='text'></p>",
-  };
-
-// might want to add a check of if "Yes" to bilingual, require final question
-
-/******************************************************************************/
 /*** Build the full timeline **************************************************/
 /******************************************************************************/
 
@@ -343,7 +269,6 @@ var full_timeline = [].concat(
     preload,
     trials_shuffled,
     next_trial,
-    demographics_survey,
     final_screen
 );
 
