@@ -170,7 +170,14 @@ test_csv_stims = [
     },
 ]
 
-function make_trial() {
+// to simulate the target content type selection. As this is happening outside the trial building function, it is of course
+// atm just static, so every time the function is called it will set target_content_type to be whatever was picked here. So 
+// need to figure out how to make this dynamic (loop?). But at least shows that the function is working as intended!
+var target_content_type = jsPsych.randomization.sampleWithoutReplacement(["con", "arc", "ana", "def_ex", "def_un", "only"], 1);
+console.log(target_content_type);
+
+
+function make_trial(target_content_type) {
     // make array with all possible truth value combinations
     var truth_values = ["tt","tf","ft","ff"];
     // randomly select one of them to be the target truth value in a trial
@@ -180,38 +187,44 @@ function make_trial() {
     // NOTE May need to use on_finish here to access the selected truth value later, when specifying data to save 
 
     /* CURRENT APPROACH: start by randomly selecting all the stimuli to be used in a given trial, then out of those pick the first 
-    element as the target, and use the three remaining ones to select the images/scenes for fillers. Avoids the risk of having the 
-    target image being used as a filler, BUT as it is selecting completely at random there is still a chance that some of the images 
-    might end up being identical (since images are now not unique for each content type and truth value combination)
+    element as the target, and use the three remaining ones to select the images/scenes for fillers. Reduces the risk of having the 
+    target image being used as a filler, BUT as it is selecting completely at random there is still a chance that one of the filler
+    images might end up being identical to the target, or that filler images end up being identical to each other (since images are 
+    now not unique for each content type and truth value combination).
+
+    OBS New method currently being worked on: want trial building function to take content_type as argument. Does atm, but this is
+    set outside the function so is currently static and we need it to be dynamic. See Dan's suggestion for how to make it so. 
+    Currently have just set filler images to be randomly selected from all of the stims, so does mean there's a decent chance
+    one (or more, since images are not unique) of the fillers will be the same as target. Think this chance can be reduced with
+    Dan's method of "shaving off" an array - then at least won't have it do exactly the same as target stim?
     */
 
-    var trial_stims = 
-    jsPsych.randomization.sampleWithoutReplacement(test_csv_stims, 4); 
-    console.log(trial_stims);
-
-    var target_stim = trial_stims[0]; 
+    // set target_stim to be determined by what is fed in as the target content type in allocation (currently simulated just
+    // the function, tbc)
+    var target_stim = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;})[0];
+    console.log(target_stim);
 
     var target_prompt_name = target_stim.prompt_name;
     // MAY REMOVE THIS variable assignment --- UNLESS it's needed for saving that data on finish
-
-    // NOTE: these lines of code were in use in a previous version where there were more than one scene that could satisfy a 
-    // given truth value and prompt combination, so not relevant now 
-    // randomly pick a number 1-3 to use as target scene index (since scenes are uniquely named)
-    //var target_scene_index = 1+(Math.floor(Math.random() * 3));
-    // start with 1, add generated random number between 0 (inclusive) and 1 (exclusive), multiply by 3, round up to whole number
+    console.log(target_prompt_name);
 
     // build target scene/image filename
     var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,".jpeg");
     console.log(target_image_filename);
-    // NOTE target_prompt_name could just be target_stim.prompt_name, if no need to store in a variable (above)
+    // NOTE target_prompt_name could just be target_stim.prompt_name, if no need to store in a variable (see above)
 
     // add filename to the list of images to preload
     images_to_preload.push(target_image_filename);
     
+    // randomly select three scenes to be fillers from the whole stim list (TEMPORARY METHOD; may want to fine tune more)
+    var filler_stims = 
+    jsPsych.randomization.sampleWithoutReplacement(test_csv_stims, 3); 
+    console.log(filler_stims);
+
     // build filler scenes filenames 
     var filler_image_filenames = []
-    for (var i=1; i<4; i++) {
-        filler_stim = trial_stims[i];
+    for (var i=0; i<3; i++) {
+        filler_stim = filler_stims[i];
         filler_image_filename = "pilot_scenes/".concat(filler_stim.prompt_name,"-",jsPsych.randomization.sampleWithoutReplacement(truth_values, 1),".jpeg"); 
         // samples truth value randomly
         filler_image_filenames.push(filler_image_filename);
@@ -241,10 +254,10 @@ function make_trial() {
 }
 
 var trials_unshuffled = [
-    make_trial(),
-    make_trial(),
-    make_trial(),
-    make_trial(),
+    make_trial(target_content_type),
+    make_trial(target_content_type),
+    make_trial(target_content_type),
+    make_trial(target_content_type),
 ];
 
 var trials_shuffled = jsPsych.randomization.shuffle(trials_unshuffled); 
