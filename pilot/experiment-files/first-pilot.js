@@ -92,8 +92,14 @@ console.log(condition_assignment);
   } else {
     response_format = radio_buttons;
   }
-// based on setting response options below, seems this does can be referred to as is and does 
+// based on setting response options below, seems this can be referred to as is and does 
 not need to be assigned to a variable 
+
+// also add some code that will specify that if condition_assignment == 'likelihood', then
+there should not be any highlighting (ideally will be else, change nothing, i.e. just be 
+selected_scenes.indexOf(target_image_filename) as it is set to currently)
+   // NOTE: if you set highlighted_image_index number outside the range of 0-3, it won't give you an error message,
+    // but just run the trial without a green square - apparently. But NEEDS TESTING
 */
 
 // Set the text and names for the response options in a trial based on condition assignment
@@ -173,7 +179,8 @@ test_csv_stims = [
 // to simulate the target content type selection. As this is happening outside the trial building function, it is of course
 // atm just static, so every time the function is called it will set target_content_type to be whatever was picked here. So 
 // need to figure out how to make this dynamic (loop?). But at least shows that the function is working as intended!
-var target_content_type = jsPsych.randomization.sampleWithoutReplacement(["con", "arc", "ana", "def_ex", "def_un", "only"], 1);
+// Idea: make it pick 10 (with replacement), then when calling the trial building function, make it run until this array is empty
+var target_content_type = jsPsych.randomization.sampleWithReplacement(["con", "arc", "ana", "def_ex", "def_un", "only"], 1);
 console.log(target_content_type);
 
 
@@ -199,10 +206,18 @@ function make_trial(target_content_type) {
     Dan's method of "shaving off" an array - then at least won't have it do exactly the same as target stim?
     */
 
-    // set target_stim to be determined by what is fed in as the target content type in allocation (currently simulated just
-    // the function, tbc)
-    var target_stim = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;})[0];
-    console.log(target_stim);
+    // set trial stims to be determined by what is fed in as the target content type in allocation (allocation currently just 
+    // simulated, tbc)
+    var trial_stims_pool = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;});
+    console.log(trial_stims_pool);
+    
+    // out of this pool of stims that all have the target content type, randomly choose 4 with replacement to populate a trial
+    var trial_stims = 
+    jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
+    console.log(trial_stims);
+    
+    // of these, pick first element to be the target (relevant for non-probability trials)
+    var target_stim = trial_stims[0]; 
 
     var target_prompt_name = target_stim.prompt_name;
     // MAY REMOVE THIS variable assignment --- UNLESS it's needed for saving that data on finish
@@ -216,15 +231,10 @@ function make_trial(target_content_type) {
     // add filename to the list of images to preload
     images_to_preload.push(target_image_filename);
     
-    // randomly select three scenes to be fillers from the whole stim list (TEMPORARY METHOD; may want to fine tune more)
-    var filler_stims = 
-    jsPsych.randomization.sampleWithoutReplacement(test_csv_stims, 3); 
-    console.log(filler_stims);
-
-    // build filler scenes filenames 
+    // build filler scenes filenames from the remaining stims in trial stims (i.e. with the same content type as target)
     var filler_image_filenames = []
-    for (var i=0; i<3; i++) {
-        filler_stim = filler_stims[i];
+    for (var i=1; i<4; i++) { 
+        filler_stim = trial_stims[i];
         filler_image_filename = "pilot_scenes/".concat(filler_stim.prompt_name,"-",jsPsych.randomization.sampleWithoutReplacement(truth_values, 1),".jpeg"); 
         // samples truth value randomly
         filler_image_filenames.push(filler_image_filename);
@@ -245,7 +255,7 @@ function make_trial(target_content_type) {
     var trial = {
         type: jsPsychImageArrayMultiChoice,
         images: selected_scenes, 
-        preamble: "", // use this as reminder that it is only the image in the green box ppts should evaluate?
+        preamble: "", // use this as reminder that it is only the image in the green box ppts should evaluate? (only for non-prob trials)
         prompt: target_stim.prompt,
         options: response_options,
         highlighted_image_index: selected_scenes.indexOf(target_image_filename) 
@@ -260,21 +270,46 @@ var trials_unshuffled = [
     make_trial(target_content_type),
 ];
 
+/* 
+var trials_unshuffled = []
+for 
+// may be better as a loop?
+if (target_content_type.length == 0) {
+    endExperiment(); // or however you're making this happen 
+ } else {
+    nextStimType = stims.shift();
+    nextTrial = trialBuildingFunction(nextStimType);
+    .... 
+
+// OR can try the approach from w10, with adding loop_function into the trial building function
+ OR as discussed in meeting (and probably simpler than shift method):
+ array = [....] (array generated with n content types, totalling to e.g. 30) (and want equal number of each, i.e. 5 in this case)
+embed within a loop:
+counter = a.length (trial counter is length of array that we have generated
+if (counter = 0)[endExperiment]
+	else (counter = -1, ... ) (i.e. do the rest of the trial building)
+	
+	on each trial check if counter = 0, if it does, end exp
+otherwise, sample w/o replacement from the array and decrement the counter
+)and keep doing that until counter = 0)
+*/
 var trials_shuffled = jsPsych.randomization.shuffle(trials_unshuffled); 
 console.log(trials_shuffled);
 
 /*
-IDEA: could have the function take a parameter that will specify the target content type (i.e. linguistic manipulation)? 
-Then could call the function like 
+Current method (wip): have the trial building function take a parameter that will specify the target content type (i.e. linguistic manipulation)
+Make it loop through/conditional until the array at start with target content types is empty, so would be called like 
 var arc_trials = make_trial("arc");
 var con_trials = make_trial("con");
 var def_ex_trials = make_trial("def_ex");
 etc
+until we tell it to stop
 
-and the number of times to call it could be determined by some pre-defined allocation (perhaps using a method like what 
-Alisdair gave me example of) that says how many of each trial type should be made.
-    - jsPsych.randomization.repeat just repeats the same trial exactly, so can't use that. 
-    Could perhaps loop until reaches the number defined by allocation at the start?
+the number of times to call it could be determined by this random array that samples e.g. 10 with replacement, 
+or by some pre-defined allocation (perhaps using a method like what Alisdair gave me example of) that says how 
+many of each trial type should be made.
+or, FOR PILOT, just have it be the same number of trials for each content type and sum to a total of 30 trials 
+
 */
 
 var next_trial = {
