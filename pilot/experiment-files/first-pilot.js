@@ -19,9 +19,6 @@ their participant id at the start of the experiment
     - response option name of button (rahter than just index)? Order is static atm
     so doesn't make a difference but may be good to have anyway
     - particpant id? If randomly generated, see conf.priming OELS
-- figure out how to do between participant allocation (type of dependent measure)
-- decide how many trials of each content type (within-pp)
-- modify plugin to have response required
 ...
 */
 
@@ -41,8 +38,8 @@ var jsPsych = initJsPsych({
 var images_to_preload = [];
 
 // NOTE: currently doing preloading as is done in conferedate_priming.js, but if
-// we change to load stims from csv, see conferedate_priming_readfromcsv.js to 
-// see how it was done there 
+// we change to load stims from csv, this needs editing; see 
+// conferedate_priming_readfromcsv.js to for how it was done there 
 
 /******************************************************************************/
 /*** Saving data trial by trial ***********************************************/
@@ -100,7 +97,15 @@ there should not be any highlighting (ideally will be else, change nothing, i.e.
 selected_scenes.indexOf(target_image_filename) as it is set to currently)
    // NOTE: if you set highlighted_image_index number outside the range of 0-3, it won't give you an error message,
     // but just run the trial without a green square - apparently. But NEEDS TESTING
+ALSO NOTE; currently started fiddling with this in the trial building function, as think it needs to be there so
+it won't just be overridden by the code in the function. But not made it work yet (15 Apr)
 */
+
+if (condition_assignment == 'likelihood') {
+    highlighted_image_index = 4}
+    else {
+        highlighted_image_index = selected_scenes.indexOf(target_image_filename)
+}
 
 // Set the text and names for the response options in a trial based on condition assignment
 
@@ -135,11 +140,7 @@ jsPsych.data.addProperties({
 /******************************************************************************/
 
 /* Steps:
-1. select a random number of trials to make of each content type (ps existence, ps uniqueness, appositive, etc)
-2. make the total number of trials always add up to e.g. 10?
-3. select status combination for secondary and primary content (T+T, T+F, F+T, or F+F)  
-    .. can this be completely random or do we need to make sure this adds up to an equal number in the end?
-4. select images based on content status 
+ADD LIST HERE to explain what the code does (short summary)
 */
 
 // pretend the stim_list csv has been read in 
@@ -176,23 +177,30 @@ test_csv_stims = [
     },
 ]
 
-// to simulate the target content type selection. As this is happening outside the trial building function, it is of course
-// atm just static, so every time the function is called it will set target_content_type to be whatever was picked here. So 
-// need to figure out how to make this dynamic (loop?). But at least shows that the function is working as intended!
-// Idea: make it pick 10 (with replacement), then when calling the trial building function, make it run until this array is empty
-var target_content_type = jsPsych.randomization.sampleWithReplacement(["con", "arc", "ana", "def_ex", "def_un", "only"], 1);
-console.log(target_content_type);
-
 /*
-NEW (15 Apr): since we want 5 of each type and 30 trials in total, just make arry of the 5 content types, repeat 6 times, shuffle, then pass
-that to some counter function loop or something which will one by one feed the target content type to the trial building function
-and build the timeline in that way. Then once the timeline is built we just run all that. Think that seems sensible?
+CURRENT METHOD (15 Apr): since we want 5 of each content type and 30 trials in total, we first make an array of the 6 content 
+types and repeat 5 times with shuffling. Then we create the trial building function, then loop through the content types array 
+to input each of those content types in turn and thereby build the individual trials. Since the content types array is shuffled 
+when created, we don't need to randomise the order of the trials when they have been created, but we can simply send that list 
+of trials to the timeline. 
 
-And since we for the pilot will have static number of trials, this can be done outside the function, I believe. 
+The trial building function chooses the set of images to be used in any one trial to be of the same content type. This is so
+that we have control of the truth value for each of the filler images (relevant for probability trials) and not just the target
+image, as it means that the image names for fillers will indeed be correct for that combination of content type and prompt (it 
+also means that there is a decent chance some of the images will be the same in any given trial). 
 
-jsPsych.randomization.repeat can maybe be used here? Not sure if it is just for repeating trials. I think we don't want them to be identical
-- although check that with Dan, obviously easier for participant - and if so it may not be useful
+Note: at current there is only one prompt per content type, so may need to make some edits if adding more later. Note also that
+the current approach for fillers where they are chosen from the pool of images that have the same content type as
+the target, in practice means that it is chosing from all images with that content type at since there are only 4 images per 
+content type + prompt at the moment. However, the code is written so that it can choose from a larger pool, if we decide to add
+more images per contcontent type + prompt combination later.
 */
+
+// create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
+// the trials will be built and thereby presented (i.e. the ranomdisation of trial order happens already here)
+// this way can easily adjust number of total trials up or down (and keep number of each content type the same across types)
+var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 5);
+console.log(target_content_types);
 
 function make_trial(target_content_type) {
     // make array with all possible truth value combinations
@@ -203,25 +211,14 @@ function make_trial(target_content_type) {
     console.log(target_truth_value);
     // NOTE May need to use on_finish here to access the selected truth value later, when specifying data to save 
 
-    /* CURRENT APPROACH: start by randomly selecting all the stimuli to be used in a given trial, then out of those pick the first 
-    element as the target, and use the three remaining ones to select the images/scenes for fillers. Reduces the risk of having the 
-    target image being used as a filler, BUT as it is selecting completely at random there is still a chance that one of the filler
-    images might end up being identical to the target, or that filler images end up being identical to each other (since images are 
-    now not unique for each content type and truth value combination).
-
-    OBS New method currently being worked on: want trial building function to take content_type as argument (maybe). Does atm, but this is
-    set outside the function so is currently static and we need it to be dynamic. See Dan's suggestion for how to make it so. 
-    Currently have just set filler images to be randomly selected from all of the stims, so does mean there's a decent chance
-    one (or more, since images are not unique) of the fillers will be the same as target. Think this chance can be reduced with
-    Dan's method of "shaving off" an array - then at least won't have it do exactly the same as target stim?
-    */
-
-    // set trial stims to be determined by what is fed in as the target content type in allocation (allocation currently just 
-    // simulated, tbc)
+    // set trial stims to be determined by what is input as the target content type when trial building function
+    // is called below 
     var trial_stims_pool = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;});
     console.log(trial_stims_pool);
     
-    // out of this pool of stims that all have the target content type, randomly choose 4 with replacement to populate a trial
+    // out of this pool of stims that all have the target content type, randomly choose 4 with replacement to 
+    // populate a trial
+    // NOTE At current (15 Apr), there is only 4 images per prompt and content type
     var trial_stims = 
     jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
     console.log(trial_stims);
@@ -261,6 +258,15 @@ function make_trial(target_content_type) {
     console.log(selected_scenes)
     console.log(selected_scenes.indexOf(target_image_filename)) // gets index of target image in the array of selected scenes
 
+    /*// attempt to make the highlighted image index be dependent on condition assignment
+    var index = 
+    if (condition_assignment == 'likelihood') {
+        index = 4}
+        else {
+            index = selected_scenes.indexOf(target_image_filename)
+    }
+    */
+
     // put trial together using the custom plugin
     var trial = {
         type: jsPsychImageArrayMultiChoice,
@@ -273,13 +279,24 @@ function make_trial(target_content_type) {
     return trial; 
 }
 
-var trials_unshuffled = [
+// build the trials according to the array of content types made at start of experiment
+// as this array was randomly shuffled, the randomisation has already happened so this 
+// code only loops through that array and pushes each trial into all_trials, which then
+// goes in the timeline at the end 
+var all_trials = []
+for (target_content_type of target_content_types) {
+    single_trial = make_trial(target_content_type);
+    all_trials.push(single_trial);
+}
+console.log(all_trials);
+
+/*var trials_unshuffled = [
     make_trial(target_content_type),
     make_trial(target_content_type),
     make_trial(target_content_type),
     make_trial(target_content_type),
 ];
-
+*/
 /* 
 var trials_unshuffled = []
 for 
@@ -291,8 +308,11 @@ if (target_content_type.length == 0) {
     nextTrial = trialBuildingFunction(nextStimType);
     .... 
 
+    
 // OR can try the approach from w10, with adding loop_function into the trial building function
  OR as discussed in meeting (and probably simpler than shift method):
+ make it pick however many total trials we want (with replacement) to make an array, then when calling the 
+ trial building function, make it run until that array is empty
  array = [....] (array generated with n content types, totalling to e.g. 30) (and want equal number of each, i.e. 5 in this case)
 embed within a loop:
 counter = a.length (trial counter is length of array that we have generated
@@ -303,11 +323,14 @@ if (counter = 0)[endExperiment]
 otherwise, sample w/o replacement from the array and decrement the counter
 )and keep doing that until counter = 0)
 */
-var trials_shuffled = jsPsych.randomization.shuffle(trials_unshuffled); 
-console.log(trials_shuffled);
+
+//var trials_shuffled = jsPsych.randomization.shuffle(trials_unshuffled); 
+//console.log(trials_shuffled);
 
 /*
-Current method (wip): have the trial building function take a parameter that will specify the target content type (i.e. linguistic manipulation)
+Another possible method (if don't want/need same number of each content type): 
+have the trial building function take the target content type as a parameter (as it does currently) 
+which then specifies the target content type (i.e. linguistic manipulation)
 Make it loop through/conditional until the array at start with target content types is empty, so would be called like 
 var arc_trials = make_trial("arc");
 var con_trials = make_trial("con");
@@ -315,11 +338,9 @@ var def_ex_trials = make_trial("def_ex");
 etc
 until we tell it to stop
 
-the number of times to call it could be determined by this random array that samples e.g. 10 with replacement, 
+the number of times to call it could be determined by this random array that samples e.g. 30 with replacement, 
 or by some pre-defined allocation (perhaps using a method like what Alisdair gave me example of) that says how 
 many of each trial type should be made.
-or, FOR PILOT, just have it be the same number of trials for each content type and sum to a total of 30 trials 
-
 */
 
 var next_trial = {
@@ -413,7 +434,7 @@ var full_timeline = [].concat(
     //instructions,
     //write_headers, -- for saving data, will add later 
     preload,
-    trials_shuffled,
+    all_trials,
     next_trial,
     demographics_survey,
     final_screen
