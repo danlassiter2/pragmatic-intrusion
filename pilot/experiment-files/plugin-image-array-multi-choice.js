@@ -98,6 +98,10 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
           display_element.innerHTML = html;
           document.querySelector("form").addEventListener("submit", (event) => {
               event.preventDefault();
+              // only allow if we have one selected
+              if (!this.any_radio_button_selected()) {
+                return;
+              }
               // measure response time
               var endTime = performance.now();
               var response_time = Math.round(endTime - startTime);
@@ -118,6 +122,13 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
               this.jsPsych.finishTrial(trial_data);
           });
           var startTime = performance.now();
+      }
+      any_radio_button_selected() {
+        var radio_buttons = document.querySelectorAll('input[type="radio"');
+        for (let idx=0; idx < radio_buttons.length; idx++) {
+          if (radio_buttons[idx].checked) { return true; }
+        }
+        return false;
       }
       simulate(trial, simulation_mode, simulation_options, load_callback) {
           if (simulation_mode == "data-only") {

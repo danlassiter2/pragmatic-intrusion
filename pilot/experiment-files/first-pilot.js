@@ -183,6 +183,16 @@ test_csv_stims = [
 var target_content_type = jsPsych.randomization.sampleWithReplacement(["con", "arc", "ana", "def_ex", "def_un", "only"], 1);
 console.log(target_content_type);
 
+/*
+NEW (15 Apr): since we want 5 of each type and 30 trials in total, just make arry of the 5 content types, repeat 6 times, shuffle, then pass
+that to some counter function loop or something which will one by one feed the target content type to the trial building function
+and build the timeline in that way. Then once the timeline is built we just run all that. Think that seems sensible?
+
+And since we for the pilot will have static number of trials, this can be done outside the function, I believe. 
+
+jsPsych.randomization.repeat can maybe be used here? Not sure if it is just for repeating trials. I think we don't want them to be identical
+- although check that with Dan, obviously easier for participant - and if so it may not be useful
+*/
 
 function make_trial(target_content_type) {
     // make array with all possible truth value combinations
@@ -199,7 +209,7 @@ function make_trial(target_content_type) {
     images might end up being identical to the target, or that filler images end up being identical to each other (since images are 
     now not unique for each content type and truth value combination).
 
-    OBS New method currently being worked on: want trial building function to take content_type as argument. Does atm, but this is
+    OBS New method currently being worked on: want trial building function to take content_type as argument (maybe). Does atm, but this is
     set outside the function so is currently static and we need it to be dynamic. See Dan's suggestion for how to make it so. 
     Currently have just set filler images to be randomly selected from all of the stims, so does mean there's a decent chance
     one (or more, since images are not unique) of the fillers will be the same as target. Think this chance can be reduced with
