@@ -45,6 +45,10 @@ var images_to_preload = [];
 /*** Saving data trial by trial ***********************************************/
 /******************************************************************************/
 
+/*
+This is the save_data function provided in Alisdair's tutorial, section 06.
+*/
+
 function save_data(name, data_in) {
     var url = "save_data.php";
     var data_to_send = { filename: name, filedata: data_in };
@@ -62,12 +66,37 @@ function save_data(name, data_in) {
 // Note, conf prim has two types of tasks, we don't so won't need the if/else 
 // (see e.g. W8 perc-learning which has a simpler save data linewise function)
 // Note2, conditional exp uses Prolific ID in saving, can probs do the same
+/*
+This code will save data from critical trials line by line. 
+
+Note that data is saved to a file named pragdep_ID.csv, where pragdep stands for 
+Pragmatics of dependent measures and ID is the randomly-generated participant ID 
+NOTE Will change if doing Prolific IDs!
+*/
+function save_pragdep_data_line(data) {
+    // choose the data we want to save - this will also determine the order of the columns
+    var data_to_save = [
+        participant_id,
+        data.condition,
+        data.trial_index,
+        data.time_elapsed,
+        data.stimulus,
+        //data.button_choices,
+        //data.button_selected,
+        data.response,
+        data.rt,
+    ];
+    // join these with commas and add a newline
+    var line = data_to_save.join(",") + "\n";
+    var this_participant_filename = "pragdep_" + participant_id + ".csv";
+    save_data(this_participant_filename, line);
+  }
 
 /******************************************************************************/
 /*** Generate a random participant ID *****************************************/
 /******************************************************************************/
 
-//var participant_id = jsPsych.randomization.randomID(10);
+var participant_id = jsPsych.randomization.randomID(10);
 // If using; see confederate priming for how to use when saving data etc.
 // other option: use Prolific ID fetching from cond code on server (pasted
 // code for this in version on the server)
@@ -199,7 +228,7 @@ more images per contcontent type + prompt combination later.
 // create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
 // the trials will be built and thereby presented (i.e. the ranomdisation of trial order happens already here)
 // this way can easily adjust number of total trials up or down (and keep number of each content type the same across types)
-var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 5);
+var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 2); // only doing 2 now while testing the save function
 console.log(target_content_types);
 
 function make_trial(target_content_type) {
@@ -264,7 +293,7 @@ function make_trial(target_content_type) {
         instruction = "<em>One card is picked at random.</em>"; // reminder to evaluate all the 
     } else {
         index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
-        instruction = "<em>For the image in the green box only, evaluate the following sentence:</em>"; // else, use as reminder to only look at the highlighted image
+        instruction = "<em>For the image in the green box, evaluate the following sentence:</em>"; // else, use as reminder to only look at the highlighted image
     } 
 
     // put trial together using the custom plugin
@@ -274,13 +303,34 @@ function make_trial(target_content_type) {
         preamble: instruction, 
         prompt: target_stim.prompt,
         options: response_options,
-        highlighted_image_index: index
+        highlighted_image_index: index,
+
+        //at the start of the trial, randomise the left-right order of the images
+        //and note that randomisation in data as button_choices
+        //and note the condition, response format (slider or radio buttons)
+        on_start: function (trial) {
+            //var shuffled_choices = jsPsych.randomization.shuffle(trial.choices);
+            //trial.choices = shuffled_choices; //set trial choices now
+            trial.data = {
+                condition: condition_assignment,
+                //response_format: PLACEHOLDER
+                //button_choices: shuffled_choices,
+                target_image:target_image_filename,
+                target_truth_
+                //filler_image:
+                };
+            },
+        on_finish: function (data) {
+            //var button_number = data.response;
+            //data.button_selected = data.button_choices[button_number];
+            save_pragdep_data_line(data); //save the trial data
+        },
     };
     return trial; 
 }
 
-// build the trials according to the array of content types made at start of experiment
-// as this array was randomly shuffled, the randomisation has already happened so this 
+// build the trials according to the array of content types made at start of experiment-
+// As this array was randomly shuffled, the randomisation has already happened so this 
 // code only loops through that array and pushes each trial into all_trials, which then
 // goes in the timeline at the end 
 var all_trials = []
@@ -347,6 +397,30 @@ var preload = {
 console.log(preload);
 
 /******************************************************************************/
+/*** Write headers for data file **********************************************/
+/******************************************************************************/
+
+/*
+Same as the perceptual learning practical.
+*/
+var write_headers = {
+    type: jsPsychCallFunction,
+    func: function () {
+      var this_participant_filename = "pragdep_" + participant_id + ".csv"; // NOTE May CHANGE participant_id if doing the prolific thing
+      //write column headers to pragdep_pilot_data.csv
+      save_data(
+        this_participant_filename,
+        "participant_id,condition,trial_index,time_elapsed,stimulus,response,rt,button_choice0,button_choice1,button_selected\n"
+      );
+          //write column headers to perceptuallearning_data.csv
+        /*save_data(
+        "perceptuallearning_data.csv",
+        "block,trial_index,time_elapsed,stimulus,button_choice_1,button_choice_2,button_selected,response,rt\n"
+      );*/
+    },
+  };
+ 
+/******************************************************************************/
 /*** Instruction trials *******************************************************/
 /******************************************************************************/
 
@@ -407,6 +481,8 @@ var demographics_survey = {
   };
 
 // might want to add a check of if "Yes" to bilingual, require final question
+// Also, may need to make it save the radio buttons in a different way, currently the 
+// data just says "On" which is not helpful
 
 /******************************************************************************/
 /*** Build the full timeline **************************************************/
@@ -415,11 +491,11 @@ var demographics_survey = {
 var full_timeline = [].concat(
     //consent_screen,
     //instructions,
-    //write_headers, -- for saving data, will add later 
+    write_headers,
     preload,
     all_trials,
     next_trial,
-    demographics_survey,
+    //demographics_survey,
     final_screen
 );
 
