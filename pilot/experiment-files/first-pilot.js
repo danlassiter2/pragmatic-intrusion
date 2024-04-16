@@ -60,7 +60,7 @@ function save_data(name, data_in) {
 // ADD CODE HERE for saving line by line, model off W9 confederate priming but 
 // need to decide what structure we want for the data first. 
 // Note, conf prim has two types of tasks, we don't so won't need the if/else 
-// (see e.g. W8 which has a simpler save data linewise function)
+// (see e.g. W8 perc-learning which has a simpler save data linewise function)
 // Note2, conditional exp uses Prolific ID in saving, can probs do the same
 
 /******************************************************************************/
@@ -78,7 +78,7 @@ function save_data(name, data_in) {
 
 // pick a random condition for the participant at start of experiment
 var condition_assignment = jsPsych.randomization.sampleWithoutReplacement(
-    ['truth', 'acceptability', 'likelihood'], 1)[0];
+    ["truth", "acceptability", "likelihood"], 1)[0];
 console.log(condition_assignment);
 
 // draft code to use for setting the response format when building trials. 
@@ -101,25 +101,25 @@ ALSO NOTE; currently started fiddling with this in the trial building function, 
 it won't just be overridden by the code in the function. But not made it work yet (15 Apr)
 */
 
-if (condition_assignment == 'likelihood') {
+/*if (condition_assignment == 'likelihood') {
     highlighted_image_index = 4}
     else {
         highlighted_image_index = selected_scenes.indexOf(target_image_filename)
-}
+} */
 
 // Set the text and names for the response options in a trial based on condition assignment
 
-if (condition_assignment == 'truth') {
+if (condition_assignment == "truth") {
     response_options = [  
         {name: "true", text: "True"},
         {name: "false", text: "False"}
         ];
-    } else if (condition_assignment == 'acceptability') {
+    } else if (condition_assignment == "acceptability") {
     response_options = [  
         {name: "acceptable", text: "Acceptable"},
         {name: "unacceptable", text: "Unacceptable"}
         ];
-    } else if (condition_assignment == 'likelihood') {
+    } else if (condition_assignment == "likelihood") {
     response_options = [  
         {name: "likely", text: "Likely"},
         {name: "unlikely", text: "Unlikely"}
@@ -258,23 +258,23 @@ function make_trial(target_content_type) {
     console.log(selected_scenes)
     console.log(selected_scenes.indexOf(target_image_filename)) // gets index of target image in the array of selected scenes
 
-    /*// attempt to make the highlighted image index be dependent on condition assignment
-    var index = 
-    if (condition_assignment == 'likelihood') {
-        index = 4}
-        else {
-            index = selected_scenes.indexOf(target_image_filename)
-    }
-    */
+    // make the highlighted image index and preamble be dependent on condition assignment 
+    if (condition_assignment == "likelihood") {
+        index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
+        instruction = "<em>One card is picked at random.</em>"; // reminder to evaluate all the 
+    } else {
+        index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
+        instruction = "<em>For the image in the green box only, evaluate the following sentence:</em>"; // else, use as reminder to only look at the highlighted image
+    } 
 
     // put trial together using the custom plugin
     var trial = {
         type: jsPsychImageArrayMultiChoice,
         images: selected_scenes, 
-        preamble: "", // use this as reminder that it is only the image in the green box ppts should evaluate? (only for non-prob trials)
+        preamble: instruction, 
         prompt: target_stim.prompt,
         options: response_options,
-        highlighted_image_index: selected_scenes.indexOf(target_image_filename) 
+        highlighted_image_index: index
     };
     return trial; 
 }
@@ -290,25 +290,8 @@ for (target_content_type of target_content_types) {
 }
 console.log(all_trials);
 
-/*var trials_unshuffled = [
-    make_trial(target_content_type),
-    make_trial(target_content_type),
-    make_trial(target_content_type),
-    make_trial(target_content_type),
-];
-*/
 /* 
-var trials_unshuffled = []
-for 
-// may be better as a loop?
-if (target_content_type.length == 0) {
-    endExperiment(); // or however you're making this happen 
- } else {
-    nextStimType = stims.shift();
-    nextTrial = trialBuildingFunction(nextStimType);
-    .... 
 
-    
 // OR can try the approach from w10, with adding loop_function into the trial building function
  OR as discussed in meeting (and probably simpler than shift method):
  make it pick however many total trials we want (with replacement) to make an array, then when calling the 
