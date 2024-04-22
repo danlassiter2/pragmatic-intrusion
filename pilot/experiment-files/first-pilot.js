@@ -79,15 +79,21 @@ function save_pragdep_data_line(data) {
         participant_id,
         data.condition,
         data.trial_index,
+        data.target_truth_value,
+        data.target_content_type,
+        data.linguistic_prompt,
+        data.target_image,
+        data.filler_images, // saves filler images in the order they were selected
+        data.images_in_order, // saves all images in a trial in the presented order (0-3)
+        data.highlight_index,
         data.time_elapsed,
-        data.stimulus,
         //data.button_choices,
         //data.button_selected,
         data.response,
         data.rt,
     ];
     // join these with commas and add a newline
-    var line = data_to_save.join(",") + "\n";
+    var line = data_to_save.join(";") + "\n"; // went with semicolon as separator since some of the prompts contain commas
     var this_participant_filename = "pragdep_" + participant_id + ".csv";
     save_data(this_participant_filename, line);
   }
@@ -140,7 +146,7 @@ it won't just be overridden by the code in the function. But not made it work ye
 
 if (condition_assignment == "truth") {
     response_options = [  
-        {name: "true", text: "True"},
+        {name: "true", text: "True"}, // NOTE Doesn't help to make the name same for both options, can still click both
         {name: "false", text: "False"}
         ];
     } else if (condition_assignment == "acceptability") {
@@ -290,7 +296,7 @@ function make_trial(target_content_type) {
     // make the highlighted image index and preamble be dependent on condition assignment 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
-        instruction = "<em>One card is picked at random.</em>"; // reminder to evaluate all the 
+        instruction = "<em>One card is picked at random.</em>"; // reminder to evaluate the sentence with respect to all the images 
     } else {
         index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
         instruction = "<em>For the image in the green box, evaluate the following sentence:</em>"; // else, use as reminder to only look at the highlighted image
@@ -313,11 +319,17 @@ function make_trial(target_content_type) {
             //trial.choices = shuffled_choices; //set trial choices now
             trial.data = {
                 condition: condition_assignment,
-                //response_format: PLACEHOLDER
+                //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
                 //button_choices: shuffled_choices,
-                target_image:target_image_filename,
-                target_truth_
-                //filler_image:
+                target_truth_value: target_truth_value, // check it's ok to have the same name
+                target_content_type: target_content_type, // check it's ok to have the same name
+                linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
+                target_image: target_image_filename,
+                filler_images: filler_image_filenames, // saves each filler file name in the order it was selected, i.e. the pre-shuffled order
+                //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
+                //could be done from the csv in data processing, although tidiest if it's already saved in csv
+                images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                highlight_index: index // check it's ok to have the same name as above
                 };
             },
         on_finish: function (data) {
@@ -400,9 +412,6 @@ console.log(preload);
 /*** Write headers for data file **********************************************/
 /******************************************************************************/
 
-/*
-Same as the perceptual learning practical.
-*/
 var write_headers = {
     type: jsPsychCallFunction,
     func: function () {
@@ -410,16 +419,55 @@ var write_headers = {
       //write column headers to pragdep_pilot_data.csv
       save_data(
         this_participant_filename,
-        "participant_id,condition,trial_index,time_elapsed,stimulus,response,rt,button_choice0,button_choice1,button_selected\n"
+        "participant_id;\
+        condition;\
+        trial_index;\
+        target_truth_value;\
+        target_content_type;\
+        linguistic_prompt;\
+        target_image;\
+        filler_images;\
+        images_in_presented_order;\
+        highlighted_image_index;\
+        time_elapsed;\
+        response;\
+        rt;\
+        button_choice0;\
+        button_choice1;\
+        button_selected\n"
       );
-          //write column headers to perceptuallearning_data.csv
+      /* column names if keeping comma as separator (meaning that every time an array is saved, e.g. filler_images, the data 
+        will be neatly split into seprate cells for each element in the array):
+      "participant_id,\
+      condition,\
+      trial_index,\
+      target_truth_value,\
+      target_content_type,\
+      linguistic_prompt,\
+      target_image,\
+      filler_image_0,\
+      filler_image_1,\
+      filler_image_2,\
+      images_in_presentation_order_0,\
+      images_in_presentation_order_1,\
+      images_in_presentation_order_2,\
+      images_in_presentation_order_3,\
+      highlighted_image_index,\
+      time_elapsed,\
+      response,\
+      rt,\
+      button_choice0,\
+      button_choice1,\
+      button_selected\n" 
+      */
+      //write column headers to perceptuallearning_data.csv
         /*save_data(
         "perceptuallearning_data.csv",
         "block,trial_index,time_elapsed,stimulus,button_choice_1,button_choice_2,button_selected,response,rt\n"
       );*/
     },
   };
- 
+
 /******************************************************************************/
 /*** Instruction trials *******************************************************/
 /******************************************************************************/
@@ -453,7 +501,7 @@ var final_screen = {
     <p style='text-align:left'>Experiments often end with a final screen, e.g. that contains a completion\
     code so the participant can claim their payment.</p>\
     <p style='text-align:left'>Click Continue to finish the experiment and see your raw data.</p>",
-    choices: ["Continue"],
+    choices: ["Finish"],
 };
 
 /******************************************************************************/

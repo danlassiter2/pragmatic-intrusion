@@ -128,7 +128,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
         for (let idx=0; idx < radio_buttons.length; idx++) {
           if (radio_buttons[idx].checked) { return true; }
         }
-        return false;
+        return false; // think this may be the place to add a (error) message to pick an option!
       }
       simulate(trial, simulation_mode, simulation_options, load_callback) {
           if (simulation_mode == "data-only") {
