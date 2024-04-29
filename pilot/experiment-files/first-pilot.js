@@ -61,11 +61,7 @@ function save_data(name, data_in) {
     });
   }
 
-// ADD CODE HERE for saving line by line, model off W9 confederate priming but 
-// need to decide what structure we want for the data first. 
-// Note, conf prim has two types of tasks, we don't so won't need the if/else 
-// (see e.g. W8 perc-learning which has a simpler save data linewise function)
-// Note2, conditional exp uses Prolific ID in saving, can probs do the same
+
 /*
 This code will save data from critical trials line by line. 
 
@@ -74,38 +70,45 @@ Pragmatics of dependent measures and ID is the randomly-generated participant ID
 NOTE Will change if doing Prolific IDs!
 */
 function save_pragdep_data_line(data) {
-    // choose the data we want to save - this will also determine the order of the columns
+    // choose the data we want to save - this will also determine the order of the columns (so write_header should match this)
     var data_to_save = [
         participant_id,
         data.condition,
+        //data.response_format, // placeholder for now, will be either slider or radio buttons (this will also be clear from response, ofc)
         data.trial_index,
         data.target_truth_value,
         data.target_content_type,
         data.linguistic_prompt,
         data.target_image,
-        data.filler_images, // saves filler images in the order they were selected
-        data.images_in_order, // saves all images in a trial in the presented order (0-3)
-        data.highlight_index,
-        data.time_elapsed,
-        //data.button_choices,
-        //data.button_selected,
+        ...data.images_in_order, // saves all images in the presented order (0-3). The ... is called spread, is applied within another 
+        // array to make them into elements in the top level array (instead of a nested array). Ex: [...[1,2],3]=[1,2,3]. Avoids issue
+        // with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (and we want it to be split)
         data.response,
+        data.time_elapsed,
+        //data.button_choices, // these two will only be needed if we for some reason need to know which index radio button was,
+        //data.button_selected, // for example. Currently response is set to store value, which is the text of the button (what we want)
         data.rt,
+        //add lines for demo survey data etc!
     ];
-    // join these with commas and add a newline
-    var line = data_to_save.join(";") + "\n"; // went with semicolon as separator since some of the prompts contain commas
+
+    // add quotation marks around each element that is saved to avoid separating prompts that have commas
+    for (i in data_to_save) {
+        data_to_save[i] = "\"" + data_to_save[i] + "\"";
+    }
+    // join each element in the array with commas and add a new line
+    var line = data_to_save.join(",") + "\n"; 
     var this_participant_filename = "pragdep_" + participant_id + ".csv";
     save_data(this_participant_filename, line);
   }
 
 /******************************************************************************/
-/*** Generate a random participant ID *****************************************/
+/*** Fetch the Prolific ID to use in data filename ****************************/
 /******************************************************************************/
 
+// just creating random ID for now
 var participant_id = jsPsych.randomization.randomID(10);
-// If using; see confederate priming for how to use when saving data etc.
-// other option: use Prolific ID fetching from cond code on server (pasted
-// code for this in version on the server)
+
+// Will change to use Prolific ID, see code for this in cond exp on server 
 
 /******************************************************************************/
 /*** Condition assignment (between ppts) **************************************/
@@ -120,62 +123,42 @@ console.log(condition_assignment);
 // May move to just before trial building function
 // use the condition to determine the response options in the trial building function
 /*if (condition_assignment == 'likelihood') {
-    response_format = slider; // will have to add this parameter to the plugin, if even possible (ask Alisdair)
+    response_format = slider; // will have to add this parameter to the plugin (have asked Alisdair)
   } else {
     response_format = radio_buttons;
   }
 // based on setting response options below, seems this can be referred to as is and does 
 not need to be assigned to a variable 
+ */
 
-// also add some code that will specify that if condition_assignment == 'likelihood', then
-there should not be any highlighting (ideally will be else, change nothing, i.e. just be 
-selected_scenes.indexOf(target_image_filename) as it is set to currently)
-   // NOTE: if you set highlighted_image_index number outside the range of 0-3, it won't give you an error message,
-    // but just run the trial without a green square - apparently. But NEEDS TESTING
-ALSO NOTE; currently started fiddling with this in the trial building function, as think it needs to be there so
-it won't just be overridden by the code in the function. But not made it work yet (15 Apr)
-*/
-
-/*if (condition_assignment == 'likelihood') {
-    highlighted_image_index = 4}
-    else {
-        highlighted_image_index = selected_scenes.indexOf(target_image_filename)
-} */
-
+// IDEA This can probably have another layer of if/else based on response format. So if radio
+// buttons, do as below, if slider, copy the below but change so that it says "completely 
+// acceptable" etc (see brainstorming doc)
 // Set the text and names for the response options in a trial based on condition assignment
-
 if (condition_assignment == "truth") {
     response_options = [  
-        {name: "true", text: "True"}, // NOTE Doesn't help to make the name same for both options, can still click both
-        {name: "false", text: "False"}
+        {name: "truth", text: "True"}, 
+        {name: "truth", text: "False"}
         ];
     } else if (condition_assignment == "acceptability") {
     response_options = [  
-        {name: "acceptable", text: "Acceptable"},
-        {name: "unacceptable", text: "Unacceptable"}
+        {name: "acceptability", text: "Acceptable"},
+        {name: "acceptability", text: "Unacceptable"}
         ];
     } else if (condition_assignment == "likelihood") {
     response_options = [  
-        {name: "likely", text: "Likely"},
-        {name: "unlikely", text: "Unlikely"}
+        {name: "likelihood", text: "Likely"},
+        {name: "likelihood", text: "Unlikely"}
         ];
     }
 console.log(response_options);
-
-/* one way to record the condition assignment in the jsPsych data, see https://www.jspsych.org/7.3/overview/data/
-// this adds a property called 'participant' and a property called 'condition' to every trial 
-jsPsych.data.addProperties({   
-    participant: participant_id,   
-    condition: condition_assignment 
-});
-*/
 
 /******************************************************************************/
 /*** Creating the trials ******************************************************/
 /******************************************************************************/
 
 /* Steps:
-ADD LIST HERE to explain what the code does (short summary)
+ADD LIST HERE to explain what the code does (short summary), or have this in the preamble
 */
 
 // pretend the stim_list csv has been read in 
@@ -253,12 +236,12 @@ function make_trial(target_content_type) {
     
     // out of this pool of stims that all have the target content type, randomly choose 4 with replacement to 
     // populate a trial
-    // NOTE At current (15 Apr), there is only 4 images per prompt and content type
+    // NOTE At current (15 Apr), there is only 4 images per prompt and content type, meaning repeats are very likely
     var trial_stims = 
     jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
     console.log(trial_stims);
     
-    // of these, pick first element to be the target (relevant for non-probability trials)
+    // of these, pick first element to be the target (relevant for non-probability trials, makes no difference for rest)
     var target_stim = trial_stims[0]; 
 
     var target_prompt_name = target_stim.prompt_name;
@@ -273,7 +256,7 @@ function make_trial(target_content_type) {
     // add filename to the list of images to preload
     images_to_preload.push(target_image_filename);
     
-    // build filler scenes filenames from the remaining stims in trial stims (i.e. with the same content type as target)
+    // build filler scenes filenames from the remaining stims in trial stims (i.e. that have the same content type as target)
     var filler_image_filenames = []
     for (var i=1; i<4; i++) { 
         filler_stim = trial_stims[i];
@@ -296,10 +279,11 @@ function make_trial(target_content_type) {
     // make the highlighted image index and preamble be dependent on condition assignment 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
+        // NOTE This may change if Alisdair has a better method
         instruction = "<em>One card is picked at random.</em>"; // reminder to evaluate the sentence with respect to all the images 
     } else {
         index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
-        instruction = "<em>For the image in the green box, evaluate the following sentence:</em>"; // else, use as reminder to only look at the highlighted image
+        instruction = "<em>For the image in the green box, evaluate the following sentence:</em>"; // use as reminder to only look at the highlighted image
     } 
 
     // put trial together using the custom plugin
@@ -311,37 +295,29 @@ function make_trial(target_content_type) {
         options: response_options,
         highlighted_image_index: index,
 
-        //at the start of the trial, randomise the left-right order of the images
-        //and note that randomisation in data as button_choices
-        //and note the condition, response format (slider or radio buttons)
+        //at the start of the trial, make a note of all relevant info to be saved
         on_start: function (trial) {
-            //var shuffled_choices = jsPsych.randomization.shuffle(trial.choices);
-            //trial.choices = shuffled_choices; //set trial choices now
             trial.data = {
                 condition: condition_assignment,
                 //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
-                //button_choices: shuffled_choices,
-                target_truth_value: target_truth_value, // check it's ok to have the same name
-                target_content_type: target_content_type, // check it's ok to have the same name
+                //button_choices: shuffled_choices, // probs not needed since we changed plugin to record the button text rather than name
+                target_truth_value: target_truth_value, // seems to work even when name is the same for both
+                target_content_type: target_content_type, // seems to work even when name is the same for both
                 linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
                 target_image: target_image_filename,
-                filler_images: filler_image_filenames, // saves each filler file name in the order it was selected, i.e. the pre-shuffled order
                 //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                //could be done from the csv in data processing, although tidiest if it's already saved in csv
+                //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
                 images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
-                highlight_index: index // check it's ok to have the same name as above
                 };
             },
         on_finish: function (data) {
-            //var button_number = data.response;
-            //data.button_selected = data.button_choices[button_number];
             save_pragdep_data_line(data); //save the trial data
         },
     };
     return trial; 
 }
 
-// build the trials according to the array of content types made at start of experiment-
+// build the trials according to the array of content types made at start of experiment.
 // As this array was randomly shuffled, the randomisation has already happened so this 
 // code only loops through that array and pushes each trial into all_trials, which then
 // goes in the timeline at the end 
@@ -352,42 +328,7 @@ for (target_content_type of target_content_types) {
 }
 console.log(all_trials);
 
-/* 
-
-// OR can try the approach from w10, with adding loop_function into the trial building function
- OR as discussed in meeting (and probably simpler than shift method):
- make it pick however many total trials we want (with replacement) to make an array, then when calling the 
- trial building function, make it run until that array is empty
- array = [....] (array generated with n content types, totalling to e.g. 30) (and want equal number of each, i.e. 5 in this case)
-embed within a loop:
-counter = a.length (trial counter is length of array that we have generated
-if (counter = 0)[endExperiment]
-	else (counter = -1, ... ) (i.e. do the rest of the trial building)
-	
-	on each trial check if counter = 0, if it does, end exp
-otherwise, sample w/o replacement from the array and decrement the counter
-)and keep doing that until counter = 0)
-*/
-
-//var trials_shuffled = jsPsych.randomization.shuffle(trials_unshuffled); 
-//console.log(trials_shuffled);
-
-/*
-Another possible method (if don't want/need same number of each content type): 
-have the trial building function take the target content type as a parameter (as it does currently) 
-which then specifies the target content type (i.e. linguistic manipulation)
-Make it loop through/conditional until the array at start with target content types is empty, so would be called like 
-var arc_trials = make_trial("arc");
-var con_trials = make_trial("con");
-var def_ex_trials = make_trial("def_ex");
-etc
-until we tell it to stop
-
-the number of times to call it could be determined by this random array that samples e.g. 30 with replacement, 
-or by some pre-defined allocation (perhaps using a method like what Alisdair gave me example of) that says how 
-many of each trial type should be made.
-*/
-
+// just for having a reference point to check all trials are being shown as expected
 var next_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: 'Im the next trial!',
@@ -419,6 +360,23 @@ var write_headers = {
       //write column headers to pragdep_pilot_data.csv
       save_data(
         this_participant_filename,
+        "participant_id,\
+        condition,\
+        trial_index,\
+        target_truth_value,\
+        target_content_type,\
+        linguistic_prompt,\
+        target_image,\
+        images_in_presentation_order_0,\
+        images_in_presentation_order_1,\
+        images_in_presentation_order_2,\
+        images_in_presentation_order_3,\
+        response,\
+        time_elapsed,\
+        rt\n" 
+      );
+      /* column names if using semicolon as separator (meaning that every time an array is saved, e.g. filler_images, all the
+        data for that variable will be in one cell, which is less readable):
         "participant_id;\
         condition;\
         trial_index;\
@@ -428,38 +386,12 @@ var write_headers = {
         target_image;\
         filler_images;\
         images_in_presented_order;\
-        highlighted_image_index;\
         time_elapsed;\
         response;\
         rt;\
         button_choice0;\
         button_choice1;\
         button_selected\n"
-      );
-      /* column names if keeping comma as separator (meaning that every time an array is saved, e.g. filler_images, the data 
-        will be neatly split into seprate cells for each element in the array):
-      "participant_id,\
-      condition,\
-      trial_index,\
-      target_truth_value,\
-      target_content_type,\
-      linguistic_prompt,\
-      target_image,\
-      filler_image_0,\
-      filler_image_1,\
-      filler_image_2,\
-      images_in_presentation_order_0,\
-      images_in_presentation_order_1,\
-      images_in_presentation_order_2,\
-      images_in_presentation_order_3,\
-      highlighted_image_index,\
-      time_elapsed,\
-      response,\
-      rt,\
-      button_choice0,\
-      button_choice1,\
-      button_selected\n" 
-      */
       //write column headers to perceptuallearning_data.csv
         /*save_data(
         "perceptuallearning_data.csv",

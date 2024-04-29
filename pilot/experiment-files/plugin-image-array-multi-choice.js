@@ -84,7 +84,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
           for (let option of trial.options) {
             let input_id = `iamc-radio-${idx}`;
             html += '<div class="iamc-option">\n';
-            html += `<input type="radio" id="${input_id}" value="${option.text}" data-name="${option.name}"></input>\n`;
+            html += `<input type="radio" id="${input_id}" value="${option.text}" name="${option.name}"></input>\n`;
             html += `<label class="iamc-radio-text" for="${input_id}">${option.text}</label>\n`;
             html += '</div>\n';
             idx += 1;
@@ -108,8 +108,11 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
               var match = display_element.querySelector("#iamc-form");
               var response;
               if (match.querySelector("input[type=radio]:checked") !== null) {
-                  response = match.querySelector("input[type=radio]:checked").attributes["data-name"].value;
+                // hide text warning
+                  response = match.querySelector("input[type=radio]:checked").attributes["value"].value;
+                  // this is where the button response is recorded - now stores the chosen button, not the name
               } else {
+                // unhide text warning (method Dan suggested to prompt ppt to respond if they haven't)
                   response = "";
               }
               // save data
@@ -128,7 +131,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
         for (let idx=0; idx < radio_buttons.length; idx++) {
           if (radio_buttons[idx].checked) { return true; }
         }
-        return false; // think this may be the place to add a (error) message to pick an option!
+        return false; // think this may be the place to add a prompt message to pick an option!
       }
       simulate(trial, simulation_mode, simulation_options, load_callback) {
           if (simulation_mode == "data-only") {
