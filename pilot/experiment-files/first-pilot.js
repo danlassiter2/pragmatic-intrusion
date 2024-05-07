@@ -82,7 +82,8 @@ function save_pragdep_data_line(data) {
         data.target_image,
         ...data.images_in_order, // saves all images in the presented order (0-3). The ... is called spread, is applied within another 
         // array to make them into elements in the top level array (instead of a nested array). Ex: [...[1,2],3]=[1,2,3]. Avoids issue
-        // with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (and we want it to be split)
+        // with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (we want it to be split for 
+        // readability in the csv file)
         data.response,
         data.time_elapsed,
         //data.button_choices, // these two will only be needed if we for some reason need to know which index radio button was,
@@ -91,7 +92,7 @@ function save_pragdep_data_line(data) {
         //add lines for demo survey data etc!
     ];
 
-    // add quotation marks around each element that is saved to avoid separating prompts that have commas
+    // add quotation marks around each element that is saved to avoid splitting prompts that have commas
     for (i in data_to_save) {
         data_to_save[i] = "\"" + data_to_save[i] + "\"";
     }

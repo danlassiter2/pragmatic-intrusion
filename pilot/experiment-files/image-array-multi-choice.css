@@ -1,7 +1,10 @@
 #iamc-grid-top {
     display: grid;
-    grid-template-rows: 1fr 1fr;
-    grid-template-columns: 1fr 1fr 2fr;
+    grid-template-rows: auto auto;
+    grid-template-columns: auto auto 1fr;
+    column-gap: 5px;
+    row-gap: 5px;
+    margin-bottom: 50px;
 }
 
 #iamc-grid-image-0 {
@@ -24,15 +27,21 @@
     grid-row: 2 / 3;
 }
 
+.iamc-grid-image-div {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
+}
+
 .iamc-grid-image {
     height: 200px;
     width: 200px;
 
-    border: 1px solid black;
+    border: 3px solid grey;
 }
 
 #iamc-grid-image-highlighted {
-    border: 5px solid green;
+    border: 3px solid green;
 }
 
 #iamc-rhs {
