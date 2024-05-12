@@ -158,21 +158,14 @@ if (responseformat_assignment== "radio") {
         }
 } else { 
     if (condition_assignment == "truth") {
-        response_options = [  
-            {labels: ["Completely false", "No clue", "Completely true"]} 
-            ];
+        response_options = ["Completely false", "No clue", "Completely true"];
         } else if (condition_assignment == "acceptability") {
-        response_options = [  
-            {labels: ["Completely unacceptable", "No clue", "Completely acceptable"]} 
-            ];
+        response_options = ["Completely unacceptable", "No clue", "Completely acceptable"];
         } else if (condition_assignment == "likelihood") {
-        response_options = [  
-            {labels: ["Completely impossible", "No clue", "Completely certain"]} 
-            ];
+        response_options = ["Completely impossible", "No clue", "Completely certain"];
         }
 }
 console.log(response_options);
-// NEED FIXING! Doesn't handle the labels object correctly 
 
 /******************************************************************************/
 /*** Creating the trials ******************************************************/
@@ -241,7 +234,7 @@ more images per contcontent type + prompt combination later.
 var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 2); // only doing 2 now while testing the save function
 console.log(target_content_types);
 
-// function to creat the radio button trials
+// function to create the trials
 function make_radio_trial(target_content_type) {
     // make array with all possible truth value combinations
     var truth_values = ["tt","tf","ft","ff"];
@@ -437,6 +430,7 @@ function make_slider_trial(target_content_type) {
             save_pragdep_data_line(data); //save the trial data
         },
     };
+    console.log(slider_trial);
     return slider_trial; 
 }
 
