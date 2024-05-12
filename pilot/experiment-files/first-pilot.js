@@ -120,25 +120,13 @@ var condition_assignment = jsPsych.randomization.sampleWithoutReplacement(
     ["truth", "acceptability", "likelihood"], 1)[0];
 console.log(condition_assignment);
 
-// draft code to use for setting the response format when building trials. 
-// May move to just before trial building function
+// randomly select which response format should be used (radio buttons or slider)
 var responseformat_assignment = jsPsych.randomization.sampleWithoutReplacement(
     ["radio", "slider"], 1)[0];
 console.log(responseformat_assignment);
-// use the condition to determine the response options in the trial building function
-/*if (condition_assignment == 'likelihood') {
-    response_format = slider; // will have to add this parameter to the plugin (have asked Alisdair)
-  } else {
-    response_format = radio_buttons;
-  }
-// based on setting response options below, seems this can be referred to as is and does 
-not need to be assigned to a variable 
- */
 
-// IDEA This can probably have another layer of if/else based on response format. So if radio
-// buttons, do as below, if slider, copy the below but change so that it says "completely 
-// acceptable" etc (see brainstorming doc)
-// Set the text and names for the response options in a trial based on condition assignment
+// Set the text and names for the response options in a trial based on response format
+// and condition assignment determined above (to pass to trial building function)
 if (responseformat_assignment== "radio") { 
     if (condition_assignment == "truth") {
         response_options = [  
@@ -235,7 +223,7 @@ var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "d
 console.log(target_content_types);
 
 // function to create the trials
-function make_radio_trial(target_content_type) {
+function make_trial(target_content_type) {
     // make array with all possible truth value combinations
     var truth_values = ["tt","tf","ft","ff"];
     // randomly select one of them to be the target truth value in a trial
@@ -302,136 +290,87 @@ function make_radio_trial(target_content_type) {
         index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
         instruction = "<em>For the image in the green box, evaluate the following sentence:</em>"; // use as reminder to only look at the highlighted image
     } 
-
-    //IDEA have an if/else statement here instead, and set it to use different plugins depending on the response format assignment 
-    // put trial together using the custom radio button plugin
-    var trial = {
-        type: jsPsychImageArrayMultiChoice,
-        images: selected_scenes, 
-        preamble: instruction, 
-        prompt: target_stim.prompt,
-        options: response_options,
-        highlighted_image_index: index,
-
-        //at the start of the trial, make a note of all relevant info to be saved
-        on_start: function (trial) {
-            trial.data = {
-                condition: condition_assignment,
-                //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
-                //button_choices: shuffled_choices, // probs not needed since we changed plugin to record the button text rather than name
-                target_truth_value: target_truth_value, // seems to work even when name is the same for both
-                target_content_type: target_content_type, // seems to work even when name is the same for both
-                linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
-                target_image: target_image_filename,
-                //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
-                images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
-                };
-            },
-        on_finish: function (data) {
-            save_pragdep_data_line(data); //save the trial data
-        },
-    };
-    return trial; 
-}
-
-// function to create the slider trials
-function make_slider_trial(target_content_type) {
-    // make array with all possible truth value combinations
-    var truth_values = ["tt","tf","ft","ff"];
-    // randomly select one of them to be the target truth value in a trial
-    var target_truth_value = 
-    jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
-    console.log(target_truth_value);
-    // NOTE May need to use on_finish here to access the selected truth value later, when specifying data to save 
-
-    // set trial stims to be determined by what is input as the target content type when trial building function
-    // is called below 
-    var trial_stims_pool = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;});
-    console.log(trial_stims_pool);
-    
-    // out of this pool of stims that all have the target content type, randomly choose 4 with replacement to 
-    // populate a trial
-    // NOTE At current (15 Apr), there is only 4 images per prompt and content type, meaning repeats are very likely
-    var trial_stims = 
-    jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
-    console.log(trial_stims);
-    
-    // of these, pick first element to be the target (relevant for non-probability trials, makes no difference for rest)
-    var target_stim = trial_stims[0]; 
-
-    var target_prompt_name = target_stim.prompt_name;
-    // MAY REMOVE THIS variable assignment --- UNLESS it's needed for saving that data on finish
-    console.log(target_prompt_name);
-
-    // build target scene/image filename
-    var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,".jpeg");
-    console.log(target_image_filename);
-    // NOTE target_prompt_name could just be target_stim.prompt_name, if no need to store in a variable (see above)
-
-    // add filename to the list of images to preload
-    images_to_preload.push(target_image_filename);
-    
-    // build filler scenes filenames from the remaining stims in trial stims (i.e. that have the same content type as target)
-    var filler_image_filenames = []
-    for (var i=1; i<4; i++) { 
-        filler_stim = trial_stims[i];
-        filler_image_filename = "pilot_scenes/".concat(filler_stim.prompt_name,"-",jsPsych.randomization.sampleWithoutReplacement(truth_values, 1),".jpeg"); 
-        // samples truth value randomly
-        filler_image_filenames.push(filler_image_filename);
-        // also add to list of images to preload
-        images_to_preload.push(filler_image_filename);
+ 
+    // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
+    // IDEA can this be even neater by having if/else statement in type? May have to be a function. See W7 if so. Would maybe have to do: 
+    /*
+    type: [], //(dummy choices initially)
+    on_start: function (trial) {
+        var shuffled_labels = jsPsych.randomization.shuffle(["buv", "cal"]);
+        trial.choices = shuffled_labels;
+      }, 
+      
+      OR can maybe just do
+    type: function(){
+        if(responseformat_assignment== "radio")){
+        return jsPsychImageArrayMultiChoice; // the parameter value has to be returned from the function
+        } else {
+        return jsPsychImageArraySliderResponse; // the parameter value has to be returned from the function
+        }
     }
-    console.log(filler_image_filenames)
+     */ 
+    if (responseformat_assignment== "radio") {
+        // make radio button trials
+        var trial = {
+            type: jsPsychImageArrayMultiChoice,
+            images: selected_scenes, 
+            preamble: instruction, 
+            prompt: target_stim.prompt,
+            options: response_options,
+            highlighted_image_index: index,
 
-    // put all the scenes together 
-    var selected_scenes_unshuffled = [].concat(target_image_filename, filler_image_filenames) 
-    console.log(selected_scenes_unshuffled)
-    // shuffle the selected scenes before passing to the trial plugin 
-    var selected_scenes = jsPsych.randomization.shuffle(selected_scenes_unshuffled);
-    console.log(selected_scenes)
-    console.log(selected_scenes.indexOf(target_image_filename)) // gets index of target image in the array of selected scenes
-
-    // set the highlighted image index and preamble dependening on condition assignment 
-    if (condition_assignment == "likelihood") {
-        index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
-        // NOTE This may change if Alisdair has a better method
-        instruction = "<em>One card is picked at random.</em>"; // reminder to evaluate the sentence with respect to all the images 
-    } else {
-        index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
-        instruction = "<em>For the image in the green box, evaluate the following sentence:</em>"; // use as reminder to only look at the highlighted image
-    } 
-
-    // put trial together using the custom slider plugin
-    var slider_trial = {
-        type: jsPsychImageArraySliderResponse,
-        images: selected_scenes,
-        preamble: instruction,
-        prompt: target_stim.prompt,
-        labels: response_options,
-        highlighted_image_index: index,
-
-        //at the start of the trial, make a note of all relevant info to be saved
-        on_start: function (slider_trial) {
-            slider_trial.data = {
-                condition: condition_assignment,
-                //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
-                //button_choices: shuffled_choices, // probs not needed since we changed plugin to record the button text rather than name
-                target_truth_value: target_truth_value, // seems to work even when name is the same for both
-                target_content_type: target_content_type, // seems to work even when name is the same for both
-                linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
-                target_image: target_image_filename,
-                //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
-                images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
-                };
+            //at the start of the trial, make a note of all relevant info to be saved
+            on_start: function (trial) {
+                trial.data = {
+                    condition: condition_assignment,
+                    //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
+                    //button_choices: shuffled_choices, // probs not needed since we changed plugin to record the button text rather than name
+                    target_truth_value: target_truth_value, // seems to work even when name is the same for both
+                    target_content_type: target_content_type, // seems to work even when name is the same for both
+                    linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
+                    target_image: target_image_filename,
+                    //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
+                    //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
+                    images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                    };
+                },
+            on_finish: function (data) {
+                save_pragdep_data_line(data); //save the trial data
             },
-        on_finish: function (data) {
-            save_pragdep_data_line(data); //save the trial data
-        },
-    };
-    console.log(slider_trial);
-    return slider_trial; 
+        };
+        return trial;
+    } else { 
+        // make slider trials
+        var slider_trial = {
+            type: jsPsychImageArraySliderResponse,
+            images: selected_scenes,
+            preamble: instruction,
+            prompt: target_stim.prompt,
+            labels: response_options,
+            highlighted_image_index: index,
+
+            //at the start of the trial, make a note of all relevant info to be saved
+            on_start: function (slider_trial) {
+                slider_trial.data = {
+                    condition: condition_assignment,
+                    //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
+                    //button_choices: shuffled_choices, // probs not needed since we changed plugin to record the button text rather than name
+                    target_truth_value: target_truth_value, // seems to work even when name is the same for both
+                    target_content_type: target_content_type, // seems to work even when name is the same for both
+                    linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
+                    target_image: target_image_filename,
+                    //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
+                    //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
+                    images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                    };
+                },
+            on_finish: function (data) {
+                save_pragdep_data_line(data); //save the trial data
+            },
+        };
+        console.log(slider_trial);
+        return slider_trial;
+    } 
 }
 
 // build the trials according to the array of content types made at start of experiment.
@@ -441,13 +380,8 @@ function make_slider_trial(target_content_type) {
 // IDEA: can this be an if statement? Dependent on response format assignment?
 var all_trials = []
 for (target_content_type of target_content_types) {
-    if (responseformat_assignment== "radio") {
-        single_trial = make_radio_trial(target_content_type);
+        single_trial = make_trial(target_content_type);
         all_trials.push(single_trial);
-    } else {
-        single_trial = make_slider_trial(target_content_type);
-        all_trials.push(single_trial);
-    }
 }
 console.log(all_trials);
 
