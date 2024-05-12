@@ -310,7 +310,7 @@ function make_trial(target_content_type) {
     }
      */ 
     if (responseformat_assignment== "radio") {
-        // make radio button trials
+        // make trials using custom radio button plugin
         var trial = {
             type: jsPsychImageArrayMultiChoice,
             images: selected_scenes, 
@@ -340,7 +340,7 @@ function make_trial(target_content_type) {
         };
         return trial;
     } else { 
-        // make slider trials
+        // else make trials using custom slider plugin
         var slider_trial = {
             type: jsPsychImageArraySliderResponse,
             images: selected_scenes,
