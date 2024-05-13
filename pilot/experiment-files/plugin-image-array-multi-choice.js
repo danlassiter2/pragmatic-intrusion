@@ -84,14 +84,15 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
           for (let option of trial.options) {
             let input_id = `iamc-radio-${idx}`;
             html += '<div class="iamc-option">\n';
-            html += `<input type="radio" id="${input_id}" value="${option.text}" data-name="${option.name}"></input>\n`;
+            html += `<input type="radio" id="${input_id}" value="${option.text}" name="${option.name}"></input>\n`; 
+            // NOTE needs to say "name" (not "data-name" as previously) for the radio buttons to only allow one chosen option
             html += `<label class="iamc-radio-text" for="${input_id}">${option.text}</label>\n`;
             html += '</div>\n';
             idx += 1;
           }
           html += '</div>';
           // add submit button
-          html += `<input type="submit" id="${plugin_id_name}-next" class="${plugin_id_name} jspsych-btn"></input>`;
+          html += `<input type="submit" id="${plugin_id_name}-next" class="${plugin_id_name} jspsych-btn" value="Continue"></input>`;
           html += "</div>\n</div>\n</form>\n";
         
           // render
@@ -108,7 +109,8 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
               var match = display_element.querySelector("#iamc-form");
               var response;
               if (match.querySelector("input[type=radio]:checked") !== null) {
-                  response = match.querySelector("input[type=radio]:checked").attributes["data-name"].value;
+                  response = match.querySelector("input[type=radio]:checked").attributes["name"].value;
+                  // same here, needs to say "name" (not "data-name" which it was originally) for radio buttons to only allow one choice
               } else {
                   response = "";
               }
@@ -128,7 +130,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
         for (let idx=0; idx < radio_buttons.length; idx++) {
           if (radio_buttons[idx].checked) { return true; }
         }
-        return false;
+        return false; // this may be the place to add a prompt message to pick an option!
       }
       simulate(trial, simulation_mode, simulation_options, load_callback) {
           if (simulation_mode == "data-only") {

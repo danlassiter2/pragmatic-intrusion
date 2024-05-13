@@ -74,7 +74,7 @@ function save_pragdep_data_line(data) {
     var data_to_save = [
         participant_id,
         data.condition,
-        //data.response_format, // placeholder for now, will be either slider or radio buttons (this will also be clear from response, ofc)
+        data.response_format, // slider or radio buttons (this will also be clear from response, ofc)
         data.trial_index,
         data.target_truth_value,
         data.target_content_type,
@@ -86,8 +86,6 @@ function save_pragdep_data_line(data) {
         // readability in the csv file)
         data.response,
         data.time_elapsed,
-        //data.button_choices, // these two will only be needed if we for some reason need to know which index radio button was,
-        //data.button_selected, // for example. Currently response is set to store value, which is the text of the button (what we want)
         data.rt,
         //add lines for demo survey data etc!
     ];
@@ -96,6 +94,7 @@ function save_pragdep_data_line(data) {
     for (i in data_to_save) {
         data_to_save[i] = "\"" + data_to_save[i] + "\"";
     }
+
     // join each element in the array with commas and add a new line
     var line = data_to_save.join(",") + "\n"; 
     var this_participant_filename = "pragdep_" + participant_id + ".csv";
@@ -284,11 +283,10 @@ function make_trial(target_content_type) {
     // set the highlighted image index and preamble dependening on condition assignment 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
-        // NOTE This may change if Alisdair has a better method
-        instruction = "<em>One card is picked at random.</em>"; // reminder to evaluate the sentence with respect to all the images 
+        instruction = "<p><em>One card is picked at random. Evaluate the following sentence:</em></p>"; // reminder to evaluate the sentence with respect to all the images 
     } else {
         index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
-        instruction = "<em>For the image in the green box, evaluate the following sentence:</em>"; // use as reminder to only look at the highlighted image
+        instruction = "<p><em>For the image highlighted with a red dashed line, evaluate the following sentence:</em></p>"; // use as reminder to only look at the highlighted image
     } 
  
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
@@ -308,6 +306,8 @@ function make_trial(target_content_type) {
         return jsPsychImageArraySliderResponse; // the parameter value has to be returned from the function
         }
     }
+    UPDATE 12 May: tried the latter, doesn't work and seems it may not be possible to have type be dynamic. Keeping 
+    the current method for now, but can keep in mind to look into this later if time (not crucial)
      */ 
     if (responseformat_assignment== "radio") {
         // make trials using custom radio button plugin
@@ -323,8 +323,7 @@ function make_trial(target_content_type) {
             on_start: function (trial) {
                 trial.data = {
                     condition: condition_assignment,
-                    //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
-                    //button_choices: shuffled_choices, // probs not needed since we changed plugin to record the button text rather than name
+                    response_format: "radio",
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
                     linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
@@ -348,13 +347,13 @@ function make_trial(target_content_type) {
             prompt: target_stim.prompt,
             labels: response_options,
             highlighted_image_index: index,
+           // slider_width: // can set this in pixels
 
             //at the start of the trial, make a note of all relevant info to be saved
             on_start: function (slider_trial) {
                 slider_trial.data = {
                     condition: condition_assignment,
-                    //response_format: PLACEHOLDER // for when can choose btw slider and radio buttons
-                    //button_choices: shuffled_choices, // probs not needed since we changed plugin to record the button text rather than name
+                    response_format: "slider",
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
                     linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
@@ -385,7 +384,7 @@ for (target_content_type of target_content_types) {
 }
 console.log(all_trials);
 
-// just for having a reference point to check all trials are being shown as expected
+// just for having a reference point to check all trials are being shown as expected - REMOVE LATER
 var next_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: 'Im the next trial!',
@@ -414,46 +413,25 @@ var write_headers = {
     type: jsPsychCallFunction,
     func: function () {
       var this_participant_filename = "pragdep_" + participant_id + ".csv"; // NOTE May CHANGE participant_id if doing the prolific thing
-      //write column headers to pragdep_pilot_data.csv
+      //write column headers to pragdep_pilot_data.csv, with quotes around to match code saving line by line 
       save_data(
         this_participant_filename,
-        "participant_id,\
-        condition,\
-        trial_index,\
-        target_truth_value,\
-        target_content_type,\
-        linguistic_prompt,\
-        target_image,\
-        images_in_presentation_order_0,\
-        images_in_presentation_order_1,\
-        images_in_presentation_order_2,\
-        images_in_presentation_order_3,\
-        response,\
-        time_elapsed,\
-        rt\n" 
+        "\"participant_id\",\
+        \"condition\",\
+        \"response_format\",\
+        \"trial_index\",\
+        \"target_truth_value\",\
+        \"target_content_type\",\
+        \"linguistic_prompt\",\
+        \"target_image\",\
+        \"images_in_presentation_order_0\",\
+        \"images_in_presentation_order_1\",\
+        \"images_in_presentation_order_2\",\
+        \"images_in_presentation_order_3\",\
+        \"response\",\
+        \"time_elapsed\",\
+        \"rt\"\n" 
       );
-      /* column names if using semicolon as separator (meaning that every time an array is saved, e.g. filler_images, all the
-        data for that variable will be in one cell, which is less readable):
-        "participant_id;\
-        condition;\
-        trial_index;\
-        target_truth_value;\
-        target_content_type;\
-        linguistic_prompt;\
-        target_image;\
-        filler_images;\
-        images_in_presented_order;\
-        time_elapsed;\
-        response;\
-        rt;\
-        button_choice0;\
-        button_choice1;\
-        button_selected\n"
-      //write column headers to perceptuallearning_data.csv
-        /*save_data(
-        "perceptuallearning_data.csv",
-        "block,trial_index,time_elapsed,stimulus,button_choice_1,button_choice_2,button_selected,response,rt\n"
-      );*/
     },
   };
 
