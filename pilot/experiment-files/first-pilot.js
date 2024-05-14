@@ -200,8 +200,8 @@ test_csv_stims = [
 CURRENT METHOD (15 Apr): since we want 5 of each content type and 30 trials in total, we first make an array of the 6 content 
 types and repeat 5 times with shuffling. Then we create the trial building function, then loop through the content types array 
 to input each of those content types in turn and thereby build the individual trials. Since the content types array is shuffled 
-when created, we don't need to randomise the order of the trials when they have been created, but we can simply send that list 
-of trials to the timeline. 
+when created, we don't need to randomise the order of the trials when the loop is finished, we can simply send that list 
+of trials to the timeline as is. 
 
 The trial building function chooses the set of images to be used in any one trial to be of the same content type. This is so
 that we have control of the truth value for each of the filler images (relevant for probability trials) and not just the target
@@ -286,7 +286,7 @@ function make_trial(target_content_type) {
         instruction = "<p><em>One card is picked at random. Evaluate the following sentence:</em></p>"; // reminder to evaluate the sentence with respect to all the images 
     } else {
         index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
-        instruction = "<p><em>For the image highlighted with a red dashed line, evaluate the following sentence:</em></p>"; // use as reminder to only look at the highlighted image
+        instruction = "<p><em>For the highlighted card, evaluate the following sentence:</em></p>"; // use as reminder to only look at the highlighted image
     } 
  
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
@@ -376,7 +376,6 @@ function make_trial(target_content_type) {
 // As this array was randomly shuffled, the randomisation has already happened so this 
 // code only loops through that array and pushes each trial into all_trials, which then
 // goes in the timeline at the end 
-// IDEA: can this be an if statement? Dependent on response format assignment?
 var all_trials = []
 for (target_content_type of target_content_types) {
         single_trial = make_trial(target_content_type);
@@ -455,8 +454,8 @@ var instructions = {
     stimulus:
       "<h3>Instructions for experiment</h3>\
     <p style='text-align:left'>In this task, we will show you series of a sentence and a set of 4 cards.</p> \
-    <p style='text-align:left'> One of the cards will be highlighted by a green box. Your task is to decide whether \
-    the sentence you see is true or false for <u>the card highlighted in the green box</u> only. \
+    <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to decide whether \
+    the sentence you see is true or false for <u>the highlighted card</u> only. \
     <p style='text-align:left'>When you feel ready to start the experiment, click Continue below.</p>",
     choices: ["Continue"],
 };
@@ -504,13 +503,13 @@ var demographics_survey = {
 /******************************************************************************/
 
 var full_timeline = [].concat(
-    //consent_screen,
-    //instructions,
+    consent_screen,
+    instructions,
     write_headers,
     preload,
     all_trials,
     next_trial,
-    //demographics_survey,
+    demographics_survey,
     final_screen
 );
 

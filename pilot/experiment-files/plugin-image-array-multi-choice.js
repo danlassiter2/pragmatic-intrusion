@@ -79,7 +79,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
           // and prompt
           html += `<div id="iamc-prompt">${trial.prompt}</div>\n`;
           // and options
-          html += '<div id="iamc-options">\n'
+          html += '<div id="iamc-options">\n<br>'
           let idx=0;
           for (let option of trial.options) {
             let input_id = `iamc-radio-${idx}`;
@@ -90,7 +90,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
             html += '</div>\n';
             idx += 1;
           }
-          html += '</div>';
+          html += '<br></div>';
           // add submit button
           html += `<input type="submit" id="${plugin_id_name}-next" class="${plugin_id_name} jspsych-btn" value="Continue"></input>`;
           html += "</div>\n</div>\n</form>\n";
