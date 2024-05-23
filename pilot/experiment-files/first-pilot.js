@@ -7,7 +7,7 @@ If doing read from csv, add info about this, e.g. mention what the structure of
 the csv is and what the structure of the read-in data is (i.e. when imported)
 
 For pilot, as it is fairly manual with current approach, we are doing only 
-one prompt per content type and one scene (i.e. image) for now
+one prompt per content type and two scenes (i.e. images) for now
 
 TO DO:
 - integrate with Prolific so get their Prolific ID? Or generate random ID/ask for
@@ -16,7 +16,7 @@ their participant id at the start of the experiment
     - prompt (i.e. linguistic stimuli)
     - target truth value
     - images filenames?
-    - response option name of button (rahter than just index)? Order is static atm
+    - response option name of button (rather than just index)? Order is static atm
     so doesn't make a difference but may be good to have anyway
     - particpant id? If randomly generated, see conf.priming OELS
 ...
@@ -61,13 +61,12 @@ function save_data(name, data_in) {
     });
   }
 
-
 /*
 This code will save data from critical trials line by line. 
 
 Note that data is saved to a file named pragdep_ID.csv, where pragdep stands for 
 Pragmatics of dependent measures and ID is the randomly-generated participant ID 
-NOTE Will change if doing Prolific IDs!
+NOTE Last part will change if doing Prolific IDs!
 */
 function save_pragdep_data_line(data) {
     // choose the data we want to save - this will also determine the order of the columns (so write_header should match this)
@@ -82,8 +81,8 @@ function save_pragdep_data_line(data) {
         data.target_image,
         ...data.images_in_order, // saves all images in the presented order (0-3). The ... is called spread, is applied within another 
         // array to make them into elements in the top level array (instead of a nested array). Ex: [...[1,2],3]=[1,2,3]. Avoids issue
-        // with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (we want it to be split for 
-        // readability in the csv file)
+        // with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (and we want this array 
+        // to be split for readability in the csv file later)
         data.response,
         data.time_elapsed,
         data.rt,
@@ -114,15 +113,22 @@ var participant_id = jsPsych.randomization.randomID(10);
 /*** Condition assignment (between ppts) **************************************/
 /******************************************************************************/
 
-// pick a random condition for the participant at start of experiment
-var condition_assignment = jsPsych.randomization.sampleWithoutReplacement(
-    ["truth", "acceptability", "likelihood"], 1)[0];
-console.log(condition_assignment);
-
-// randomly select which response format should be used (radio buttons or slider)
+// randomly select response format (radio buttons or slider) at start of experiment
 var responseformat_assignment = jsPsych.randomization.sampleWithoutReplacement(
     ["radio", "slider"], 1)[0];
 console.log(responseformat_assignment);
+
+// pick a random condition
+// Note that if radio is chosen above, it only chooses between acceptability and truth 
+// (not likelihood, as that's too unnatural and likely won't provide interesting data)
+if (responseformat_assignment== "radio") { 
+    var condition_assignment = 
+        jsPsych.randomization.sampleWithoutReplacement(["truth", "acceptability"], 1)[0];
+} else {
+    var condition_assignment = 
+        jsPsych.randomization.sampleWithoutReplacement(["truth", "acceptability", "likelihood"], 1)[0];
+}
+console.log(condition_assignment);
 
 // Set the text and names for the response options in a trial based on response format
 // and condition assignment determined above (to pass to trial building function)
@@ -132,24 +138,19 @@ if (responseformat_assignment== "radio") {
             {name: "truth", text: "True"}, 
             {name: "truth", text: "False"}
             ];
-        } else if (condition_assignment == "acceptability") {
+        } else {
         response_options = [  
             {name: "acceptability", text: "Acceptable"},
             {name: "acceptability", text: "Unacceptable"}
             ];
-        } else if (condition_assignment == "likelihood") {
-        response_options = [  
-            {name: "likelihood", text: "Likely"},
-            {name: "likelihood", text: "Unlikely"}
-            ];
         }
 } else { 
     if (condition_assignment == "truth") {
-        response_options = ["Completely false", "No clue", "Completely true"];
+        response_options = ["Completely false", "Completely true"];
         } else if (condition_assignment == "acceptability") {
-        response_options = ["Completely unacceptable", "No clue", "Completely acceptable"];
+        response_options = ["Completely unacceptable", "Completely acceptable"];
         } else if (condition_assignment == "likelihood") {
-        response_options = ["Completely impossible", "No clue", "Completely certain"];
+        response_options = ["Completely impossible", "Completely certain"];
         }
 }
 console.log(response_options);
@@ -238,20 +239,26 @@ function make_trial(target_content_type) {
     
     // out of this pool of stims that all have the target content type, randomly choose 4 with replacement to 
     // populate a trial
-    // NOTE At current (15 Apr), there is only 4 images per prompt and content type, meaning repeats are very likely
-    var trial_stims = 
-    jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
+    // NOTE At current (23 May), there are 8 images per prompt and content type (i.e. 2 unique images per prompt, 
+    // repeated 4 times for each of the possible truth status combinations)
+    var trial_stims = jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
     console.log(trial_stims);
     
     // of these, pick first element to be the target (relevant for non-probability trials, makes no difference for rest)
     var target_stim = trial_stims[0]; 
 
+    // build target scene/image filename
     var target_prompt_name = target_stim.prompt_name;
     // MAY REMOVE THIS variable assignment --- UNLESS it's needed for saving that data on finish
     console.log(target_prompt_name);
 
-    // build target scene/image filename
-    var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,".jpeg");
+    // NOTE: since there are two possible (uniquely named) scenes that can satisfy a 
+    // given truth value and prompt combination, the image filename is set to
+    // randomly pick a number 1-2 for the scene index and include that n the filename
+    // var target_scene_index = 1+(Math.floor(Math.random() * 2));
+    // start with 1, add generated random number between 0 (inclusive) and 2 (exclusive), multiply by 3, round up to whole number
+
+    var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpeg");
     console.log(target_image_filename);
     // NOTE target_prompt_name could just be target_stim.prompt_name, if no need to store in a variable (see above)
 
@@ -262,8 +269,14 @@ function make_trial(target_content_type) {
     var filler_image_filenames = []
     for (var i=1; i<4; i++) { 
         filler_stim = trial_stims[i];
-        filler_image_filename = "pilot_scenes/".concat(filler_stim.prompt_name,"-",jsPsych.randomization.sampleWithoutReplacement(truth_values, 1),".jpeg"); 
-        // samples truth value randomly
+        filler_image_filename = "pilot_scenes/".concat(
+            filler_stim.prompt_name,
+            "-",
+            jsPsych.randomization.sampleWithoutReplacement(truth_values, 1), // randomly samples truth value 
+            "-",
+            1+(Math.floor(Math.random() * 2)), // randomly selects scene index (1 or 2)
+            ".jpeg"
+        ); 
         // IDEA if need to store filler image truth values, may be able to log it here? Can use console log and store in an object, or 
         // do the randomisation and store in an object before putting together the filename
         filler_image_filenames.push(filler_image_filename);
