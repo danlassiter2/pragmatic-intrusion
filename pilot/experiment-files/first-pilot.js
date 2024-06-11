@@ -130,27 +130,34 @@ if (responseformat_assignment== "radio") {
 }
 console.log(condition_assignment);
 
-// Set the text and names for the response options in a trial based on response format
-// and condition assignment determined above (to pass to trial building function)
+// Set the text and names for the response options and the instructions in a trial based on
+// response format and condition assignment determined above (to pass to trial building function).
+// if the response format is radio, set these values: 
 if (responseformat_assignment== "radio") { 
     if (condition_assignment == "truth") {
         response_options = [  
             {name: "truth", text: "True"}, 
             {name: "truth", text: "False"}
             ];
+        instruction = "<p><em>For the highlighted card, is the following description true?</em></p>";
         } else {
         response_options = [  
             {name: "acceptability", text: "Acceptable"},
             {name: "acceptability", text: "Unacceptable"}
             ];
+        instruction = "<p><em>For the highlighted card, is the following description acceptable?</em></p>";
         }
+// or else, the response format is slider, and these values are chosen:
 } else { 
     if (condition_assignment == "truth") {
         response_options = ["Completely false", "Completely true"];
+        instruction = "<p><em>For the highlighted card, how true is the following description?</em></p>";
         } else if (condition_assignment == "acceptability") {
         response_options = ["Completely unacceptable", "Completely acceptable"];
+        instruction = "<p><em>For the highlighted card, how acceptable is the following description?</em></p>";
         } else if (condition_assignment == "likelihood") {
         response_options = ["Completely impossible", "Completely certain"];
+        instruction = "<p><em>One card is picked at random. How likely is the following description to be true?</em></p>";
         }
 }
 console.log(response_options);
@@ -258,7 +265,7 @@ function make_trial(target_content_type) {
     // var target_scene_index = 1+(Math.floor(Math.random() * 2));
     // start with 1, add generated random number between 0 (inclusive) and 2 (exclusive), multiply by 3, round up to whole number
 
-    var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpeg");
+    var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpg");
     console.log(target_image_filename);
     // NOTE target_prompt_name could just be target_stim.prompt_name, if no need to store in a variable (see above)
 
@@ -275,7 +282,7 @@ function make_trial(target_content_type) {
             jsPsych.randomization.sampleWithoutReplacement(truth_values, 1), // randomly samples truth value 
             "-",
             1+(Math.floor(Math.random() * 2)), // randomly selects scene index (1 or 2)
-            ".jpeg"
+            ".jpg"
         ); 
         // IDEA if need to store filler image truth values, may be able to log it here? Can use console log and store in an object, or 
         // do the randomisation and store in an object before putting together the filename
@@ -296,10 +303,10 @@ function make_trial(target_content_type) {
     // set the highlighted image index and preamble dependening on condition assignment 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
-        instruction = "<p><em>One card is picked at random. Evaluate the following sentence:</em></p>"; // reminder to evaluate the sentence with respect to all the images 
+       // instruction = "<p><em>One card is picked at random. How likely is the following description to be true?</em></p>"; // reminder to evaluate the sentence with respect to all the images 
     } else {
         index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
-        instruction = "<p><em>For the highlighted card, evaluate the following sentence:</em></p>"; // use as reminder to only look at the highlighted image
+       // instruction = "<p><em>For the highlighted card, evaluate the following sentence:</em></p>"; // use as reminder to only look at the highlighted image
     } 
  
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
@@ -461,6 +468,7 @@ var consent_screen = {
     <p style='text-align:left'>This is a placeholder for that information.</p>",
     choices: ["Yes, I consent to participate"],
 };
+// This text needs to be updated! Will be whatever consent form we have ethics for, I assume
   
 var instructions = {
     type: jsPsychHtmlButtonResponse,
@@ -472,6 +480,13 @@ var instructions = {
     <p style='text-align:left'>When you feel ready to start the experiment, click Continue below.</p>",
     choices: ["Continue"],
 };
+
+/*
+Will need the instruction screen to vary depending on the assigned condition and response format. Can this be done simply 
+by adding a dynamic variable in the html? Might have to add some async function though, as I'm not sure the instructions variable
+will be able to access the relevant info before the trials are made... Although the relevant info is set early on, so if 
+everything is run in order then that may already be available.. test it and see!
+ */
   
 var final_screen = {
     type: jsPsychHtmlButtonResponse,
@@ -484,8 +499,16 @@ var final_screen = {
 };
 
 /******************************************************************************/
-/*** Demographics survey ******************************************************/
+/*** Feedback and demographics ******************************************************/
 /******************************************************************************/
+
+var feedback = {
+    type: jsPsychSurveyText,
+    preamble: "<p style='text-align:left'> <b>Feedback</b></p>",
+    questions: [
+      {prompt: 'Do you have any comments about this experiment?', rows: 5, name: 'feedback'}
+    ]
+  }
 
 var demographics_survey = {
     type: jsPsychSurveyHtmlForm,
@@ -505,6 +528,7 @@ var demographics_survey = {
             <p style='text-align:left'>If you responded yes above, \
            which language(s)?<br>\
               <input name='other_lang' type='text'></p>",
+
   };
 
 // might want to add a check of if "Yes" to bilingual, require final question
@@ -516,12 +540,13 @@ var demographics_survey = {
 /******************************************************************************/
 
 var full_timeline = [].concat(
-    consent_screen,
-    instructions,
+   // consent_screen,
+   // instructions,
     write_headers,
     preload,
     all_trials,
     next_trial,
+    feedback,
     demographics_survey,
     final_screen
 );
