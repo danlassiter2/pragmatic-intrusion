@@ -132,7 +132,8 @@ console.log(condition_assignment);
 
 // Set the text and names for the response options and the instructions in a trial based on
 // response format and condition assignment determined above (to pass to trial building function).
-// if the response format is radio, set these values: 
+// if the response format is radio, set these values for each of the conditions:
+// (note that likelihood is not included here as we are not doing binary likelihood trials) 
 if (responseformat_assignment== "radio") { 
     if (condition_assignment == "truth") {
         response_options = [  
@@ -184,7 +185,7 @@ test_csv_stims = [
     },
     { 
         content_type: "ana", 
-        prompt: "The triangle is yellow too.", 
+        prompt: "The triangle is orange too.", 
         prompt_name: "ana", 
     },
     { 
@@ -199,7 +200,7 @@ test_csv_stims = [
     },
     { 
         content_type: "only", 
-        prompt: "Only the square is orange.", 
+        prompt: "Only the square is green.", 
         prompt_name: "only", 
     },
 ]
@@ -225,7 +226,7 @@ more images per contcontent type + prompt combination later.
 
 // create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
 // the trials will be built and thereby presented (i.e. the ranomdisation of trial order happens already here)
-// this way can easily adjust number of total trials up or down (and keep number of each content type the same across types)
+// This way can easily adjust number of total trials up or down (and keep number of each content type the same across types)
 var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 2); // only doing 2 now while testing the save function
 console.log(target_content_types);
 
@@ -244,10 +245,10 @@ function make_trial(target_content_type) {
     var trial_stims_pool = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;});
     console.log(trial_stims_pool);
     
-    // out of this pool of stims that all have the target content type, randomly choose 4 with replacement to 
-    // populate a trial
-    // NOTE At current (23 May), there are 8 images per prompt and content type (i.e. 2 unique images per prompt, 
-    // repeated 4 times for each of the possible truth status combinations)
+    // out of this pool of stims that all have the target content type for that trial, randomly choose 4 with 
+    // replacement to populate the trial
+    // NOTE At current (12 June), there are 8 images associated with each prompt (note: prompt is identical to content
+    // type at current, since there is only one prompt for each content type): 2 images * 4 possible truth status combinations
     var trial_stims = jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
     console.log(trial_stims);
     
@@ -261,9 +262,11 @@ function make_trial(target_content_type) {
 
     // NOTE: since there are two possible (uniquely named) scenes that can satisfy a 
     // given truth value and prompt combination, the image filename is set to
-    // randomly pick a number 1-2 for the scene index and include that n the filename
-    // var target_scene_index = 1+(Math.floor(Math.random() * 2));
-    // start with 1, add generated random number between 0 (inclusive) and 2 (exclusive), multiply by 3, round up to whole number
+    // randomly pick a number 1-2 for the scene index and include that in the filename
+    // 1+(Math.floor(Math.random() * 2));
+    // Explanation: start with 1, add generated random number between 0 (inclusive) and 1 (exclusive), 
+    // multiply by 2, round up to whole number
+    // NOTE: CHECK this explanation is correct! In the old exp file
 
     var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpg");
     console.log(target_image_filename);
