@@ -164,11 +164,21 @@ if (responseformat_assignment== "radio") {
 console.log(response_options);
 
 /******************************************************************************/
-/*** Creating the trials ******************************************************/
+/*** Creating training trials *************************************************/
+/******************************************************************************/
+
+/* Plan:
+- make a trial, which will either be slider or radio depending on response format assignment
+- in that trial, check the response on_finish
+- if correct response: give correct feedback -> move on to testing instr 
+*/
+
+/******************************************************************************/
+/*** Creating testing trials **************************************************/
 /******************************************************************************/
 
 /* Steps:
-ADD LIST HERE to explain what the code does (short summary), or have this in the preamble
+NOTE: ADD LIST HERE to explain what the code does (short summary), or have this in the preamble
 */
 
 // pretend the stim_list csv has been read in 
@@ -397,14 +407,14 @@ function make_trial(target_content_type) {
 
 // build the trials according to the array of content types made at start of experiment.
 // As this array was randomly shuffled, the randomisation has already happened so this 
-// code only loops through that array and pushes each trial into all_trials, which then
+// code only loops through that array and pushes each trial into test_trials, which then
 // goes in the timeline at the end 
-var all_trials = []
+var test_trials = []
 for (target_content_type of target_content_types) {
         single_trial = make_trial(target_content_type);
-        all_trials.push(single_trial);
+        test_trials.push(single_trial);
 }
-console.log(all_trials);
+console.log(test_trials);
 
 // just for having a reference point to check all trials are being shown as expected - REMOVE LATER
 var next_trial = {
@@ -472,25 +482,45 @@ var consent_screen = {
     choices: ["Yes, I consent to participate"],
 };
 // This text needs to be updated! Will be whatever consent form we have ethics for, I assume
-  
+
+// Instructions will depend on condition assignment, so made the stimulus parameter dynamic by using a function
+// that checks what the condition assignment is and returns the corresponding instructions
 var instructions = {
     type: jsPsychHtmlButtonResponse,
-    stimulus:
-      "<h3>Instructions for experiment</h3>\
-    <p style='text-align:left'>In this task, we will show you series of a sentence and a set of 4 cards.</p> \
-    <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to decide whether \
-    the sentence you see is true or false for <u>the highlighted card</u> only. \
-    <p style='text-align:left'>When you feel ready to start the experiment, click Continue below.</p>",
+    stimulus: function(){
+        if (condition_assignment == "likelihood") {
+            return "<h3>Instructions for experiment</h3>\
+            <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
+            <p style='text-align:left'> Your task is to indicate how likely the sentence is to be true for the 4 cards.<br> \
+            We'll start with a practice question to get you familiarised with what the experiment looks like. \
+            <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
+        } else if (condition_assignment == "truth") {
+            return "<h3>Instructions for experiment</h3>\
+            <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
+            <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
+            the sentence is true for <u>the highlighted card</u> only.<br> \
+            We'll start with a practice question to get you familiarised with what the experiment will look like. \
+            <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
+        } else if (condition_assignment == "acceptability") {
+            return "<h3>Instructions for experiment</h3>\
+            <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
+            <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
+            the sentence is acceptable for <u>the highlighted card</u> only.<br> \
+            We'll start with a practice question to get you familiarised with what the experiment will look like. \
+            <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
+        }
+    }, 
     choices: ["Continue"],
 };
 
-/*
-Will need the instruction screen to vary depending on the assigned condition and response format. Can this be done simply 
-by adding a dynamic variable in the html? Might have to add some async function though, as I'm not sure the instructions variable
-will be able to access the relevant info before the trials are made... Although the relevant info is set early on, so if 
-everything is run in order then that may already be available.. test it and see!
- */
-  
+var exp_start = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus:
+      "<h3>Start of the experiment</h3>\
+    <p style='text-align:left'>Now you hopefully feel familiarised with what the questions will look like. </p>\
+    <p style='text-align:left'>When you feel ready to start the real experiment, click Continue below.</p>",
+    choices: ["Continue"],    
+}
 var final_screen = {
     type: jsPsychHtmlButtonResponse,
     stimulus:
@@ -536,7 +566,7 @@ var demographics_survey = {
 
 // might want to add a check of if "Yes" to bilingual, require final question
 // Also, may need to make it save the radio buttons in a different way, currently the 
-// data just says "On" which is not helpful
+// data just says "On" which is not helpful - CHECK THIS
 
 /******************************************************************************/
 /*** Build the full timeline **************************************************/
@@ -544,10 +574,12 @@ var demographics_survey = {
 
 var full_timeline = [].concat(
    // consent_screen,
-   // instructions,
+    instructions,
     write_headers,
     preload,
-    all_trials,
+   // training_trials,
+    exp_start, 
+    test_trials,
     next_trial,
     feedback,
     demographics_survey,
