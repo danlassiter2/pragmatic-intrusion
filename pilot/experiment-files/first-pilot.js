@@ -121,7 +121,7 @@ console.log(responseformat_assignment);
 // pick a random condition
 // Note that if radio is chosen above, it only chooses between acceptability and truth 
 // (not likelihood, as that's too unnatural and likely won't provide interesting data)
-if (responseformat_assignment== "radio") { 
+if (responseformat_assignment == "radio") { 
     var condition_assignment = 
         jsPsych.randomization.sampleWithoutReplacement(["truth", "acceptability"], 1)[0];
 } else {
@@ -134,7 +134,7 @@ console.log(condition_assignment);
 // response format and condition assignment determined above (to pass to trial building function).
 // if the response format is radio, set these values for each of the conditions:
 // (note that likelihood is not included here as we are not doing binary likelihood trials) 
-if (responseformat_assignment== "radio") { 
+if (responseformat_assignment == "radio") { 
     if (condition_assignment == "truth") {
         response_options = [  
             {name: "truth", text: "True"}, 
@@ -162,24 +162,6 @@ if (responseformat_assignment== "radio") {
         }
 }
 console.log(response_options);
-
-/******************************************************************************/
-/*** Creating training trials *************************************************/
-/******************************************************************************/
-
-/* Plan:
-- make a trial, which will either be slider or radio depending on response format assignment
-- in that trial, check the response on_finish
-- if correct response: give correct feedback -> move on to testing instr 
-*/
-
-/******************************************************************************/
-/*** Creating testing trials **************************************************/
-/******************************************************************************/
-
-/* Steps:
-NOTE: ADD LIST HERE to explain what the code does (short summary), or have this in the preamble
-*/
 
 // pretend the stim_list csv has been read in 
 test_csv_stims = [
@@ -215,6 +197,121 @@ test_csv_stims = [
     },
 ]
 
+// create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
+// the trials will be built and thereby presented (i.e. the randomisation of trial order happens already here)
+// This way can easily adjust number of total trials up or down (and keep number of each content type the same across types)
+var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 2); // only doing 2 now while testing the save function
+console.log(target_content_types);
+
+/******************************************************************************/
+/*** Creating training trials *************************************************/
+/******************************************************************************/
+
+/* Plan:
+- make a trial, which will either be slider or radio depending on response format assignment
+- and either likelihood, acceptability or truth depending on condition assignment
+- in that trial, check the response on_finish
+- if correct response: give correct feedback -> move on to testing trials
+- if incorrect response: give incorrect feedback --> loop back to the same trial until they get it right
+- have 3-4 training trials? Same regardless of condition and response format
+
+- may need to have a separate stim list for training trials. As we need to have complete control of what is the correct an
+incorrect answers - which we do for testing trials too, but for training we'll want some trials that are false, some true, and
+some that are 50/50 to check that they pay attention. In the test, this can be completely random, but not in training.
+- also because we are NOT using the same linguistic stimuli for training! So prompts will have to be different.
+(this may also mean that the csv stim list for test can be moved back to appear right before test trial building function)
+
+prob trials: extreme probabilities, but also one trial that is 50/50 (i.e. 2 clear true and 2 clear false)
+---- note: this one will ofc only be slider
+
+non-prob trials: one trial that is clearly appropriate and one that clearly isn't, and one in between?
+
+(4 images, one prompt) x 3 
+can have function take the target image + the prompt? 
+Ofc, the images will be the same independent of condition and response format, no?
+Ex: 
+	The triangle is green. (always one triangle, blue or not)
+	The square is left of the circle. 
+    There is a triangle left of the circle. 
+*/
+
+// want 3 trials; one clearly F, one clearly T, one in between 
+
+// UNDER CONSTRUCTION
+
+function make_training_trial(response_format){
+    if (responseformat_assignment== "radio") {
+        // make trials using custom radio button plugin
+        var radio_training_trial = {
+            type: jsPsychImageArrayMultiChoice,
+            images: selected_scenes, // how scenes are selected will be different from the below
+            preamble: instruction, // this is set, so okay as is 
+            prompt: target_stim.prompt, // will also be different; want to just loop through a list, perhaps? or specify in function input
+            options: response_options, // this is set, so okay as is 
+            highlighted_image_index: index, // this will depend on target, like in test
+
+            //at the start of the trial, make a note of all relevant info to be saved
+            on_start: function (radio_training_trial) {
+                radio_training_trial.data = {
+                    condition: condition_assignment,
+                    response_format: "radio",
+                    target_truth_value: target_truth_value, 
+                    target_content_type: target_content_type, 
+                    linguistic_prompt: target_stim.prompt, 
+                    target_image: target_image_filename,
+                    //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
+                    //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
+                    images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                    };
+                },
+            on_finish: function (data) {
+                save_pragdep_data_line(data); //save the trial data
+                // add code here to store the most recent response, so that can be checked and used for feedback!
+            },
+        };
+        return radio_training_trial;
+    } else { 
+        // else make trials using custom slider plugin
+        var slider_training_trial = {
+            type: jsPsychImageArraySliderResponse,
+            images: selected_scenes,
+            preamble: instruction,
+            prompt: target_stim.prompt,
+            labels: response_options,
+            highlighted_image_index: index,
+           // slider_width: // can set this in pixels
+
+            //at the start of the trial, make a note of all relevant info to be saved
+            on_start: function (slider_training_trial) {
+                slider_training_trial.data = {
+                    condition: condition_assignment,
+                    response_format: "slider",
+                    target_truth_value: target_truth_value, 
+                    target_content_type: target_content_type, 
+                    linguistic_prompt: target_stim.prompt, 
+                    target_image: target_image_filename,
+                    //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
+                    //could be done from the csv during data processing, although tidiest if it's already saved in csv perhaps?
+                    images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                    };
+                },
+            on_finish: function (data) {
+                save_pragdep_data_line(data); //save the trial data
+            },
+        };
+        console.log(slider_training_trial);
+        return slider_training_trial;
+    } 
+    
+}
+/******************************************************************************/
+/*** Creating testing trials **************************************************/
+/******************************************************************************/
+
+/* Steps:
+NOTE: ADD LIST HERE to explain what the code does (short summary), or have this in the preamble
+*/
+
 /*
 CURRENT METHOD (15 Apr): since we want 5 of each content type and 30 trials in total, we first make an array of the 6 content 
 types and repeat 5 times with shuffling. Then we create the trial building function, then loop through the content types array 
@@ -234,12 +331,6 @@ content type + prompt at the moment. However, the code is written so that it can
 more images per contcontent type + prompt combination later.
 */
 
-// create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
-// the trials will be built and thereby presented (i.e. the ranomdisation of trial order happens already here)
-// This way can easily adjust number of total trials up or down (and keep number of each content type the same across types)
-var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 2); // only doing 2 now while testing the save function
-console.log(target_content_types);
-
 // function to create the trials
 function make_trial(target_content_type) {
     // make array with all possible truth value combinations
@@ -252,6 +343,7 @@ function make_trial(target_content_type) {
 
     // set trial stims to be determined by what is input as the target content type when trial building function
     // is called below 
+    // so this returns everything in the stim list (the pretend csv) that matches the current target content type
     var trial_stims_pool = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;});
     console.log(trial_stims_pool);
     
@@ -277,7 +369,6 @@ function make_trial(target_content_type) {
     // Explanation: start with 1, add generated random number between 0 (inclusive) and 1 (exclusive), 
     // multiply by 2, round up to whole number
     // NOTE: CHECK this explanation is correct! In the old exp file
-
     var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpg");
     console.log(target_image_filename);
     // NOTE target_prompt_name could just be target_stim.prompt_name, if no need to store in a variable (see above)
@@ -316,10 +407,8 @@ function make_trial(target_content_type) {
     // set the highlighted image index and preamble dependening on condition assignment 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
-       // instruction = "<p><em>One card is picked at random. How likely is the following description to be true?</em></p>"; // reminder to evaluate the sentence with respect to all the images 
     } else {
-        index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the target image
-       // instruction = "<p><em>For the highlighted card, evaluate the following sentence:</em></p>"; // use as reminder to only look at the highlighted image
+        index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the position of the target image
     } 
  
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
@@ -359,7 +448,7 @@ function make_trial(target_content_type) {
                     response_format: "radio",
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
-                    linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
+                    linguistic_prompt: target_stim.prompt, 
                     target_image: target_image_filename,
                     //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
                     //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
@@ -389,7 +478,7 @@ function make_trial(target_content_type) {
                     response_format: "slider",
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
-                    linguistic_prompt: target_stim.prompt, // this works! Means can remove unnecessary variable assignments above if desired
+                    linguistic_prompt: target_stim.prompt, 
                     target_image: target_image_filename,
                     //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
                     //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
@@ -489,20 +578,20 @@ var instructions = {
     type: jsPsychHtmlButtonResponse,
     stimulus: function(){
         if (condition_assignment == "likelihood") {
-            return "<h3>Instructions for experiment</h3>\
+            return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> Your task is to indicate how likely the sentence is to be true for the 4 cards.<br> \
             We'll start with a practice question to get you familiarised with what the experiment looks like. \
             <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
         } else if (condition_assignment == "truth") {
-            return "<h3>Instructions for experiment</h3>\
+            return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
             the sentence is true for <u>the highlighted card</u> only.<br> \
             We'll start with a practice question to get you familiarised with what the experiment will look like. \
             <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
         } else if (condition_assignment == "acceptability") {
-            return "<h3>Instructions for experiment</h3>\
+            return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
             the sentence is acceptable for <u>the highlighted card</u> only.<br> \
