@@ -61,10 +61,11 @@ console.log(plugin_type);
 function make_training_trial(){
     var trial = {
         type: plugin_type,
-        images: ["pilot_scenes/training_stims/blue-triangle-1.jpg",
-                "pilot_scenes/training_stims/blue-triangle-2.jpg", 
-                "pilot_scenes/training_stims/blue-triangle-2.jpg", 
-                "pilot_scenes/training_stims/blue-triangle-2.jpg"], 
+        images: jsPsych.randomization.shuffle(
+            ["pilot_scenes/training_stims/blue-triangle-1.jpg",
+            "pilot_scenes/training_stims/blue-triangle-2.jpg", 
+            "pilot_scenes/training_stims/blue-triangle-3.jpg", 
+            "pilot_scenes/training_stims/blue-triangle-4.jpg"]), 
         preamble: instruction, // this is set, so okay as is 
         prompt: "Pick a card. Any card", // will also be different; want to just loop through a list, perhaps? or specify in function input
         options: response_options, // this is set, so okay as is 
@@ -92,6 +93,16 @@ function make_training_trial(){
 console.log(trial);
 return trial;
 };
+
+// FAILED attempt at looping; doesn't like the "filler_'" on line 99
+var filler_filenames = []
+var fillers = [filler_1, filler_2, filler_3];
+for (var filler of fillers) { 
+    filler_filename = "pilot_scenes/".concat(filler,".jpg"); 
+    filler_filenames.push(filler_filename);
+}
+
+console.log(filler_filenames);
 
 var test_trial = make_training_trial();
 var test_trial2 = make_training_trial();

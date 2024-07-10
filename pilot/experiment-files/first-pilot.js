@@ -37,6 +37,9 @@ var jsPsych = initJsPsych({
 
 var images_to_preload = [];
 
+// NOTE: ADD in the testing stims, as they will be shown to every ppt so 
+// guaranteed they'll need to be preloaded
+
 // NOTE: currently doing preloading as is done in conferedate_priming.js, but if
 // we change to load stims from csv, this needs editing; see 
 // conferedate_priming_readfromcsv.js to for how it was done there 
@@ -397,7 +400,7 @@ function make_trial(target_content_type) {
     console.log(filler_image_filenames)
 
     // put all the scenes together 
-    var selected_scenes_unshuffled = [].concat(target_image_filename, filler_image_filenames) 
+    var selected_scenes_unshuffled = [].concat(target_image_filename, filler_image_filenames);
     console.log(selected_scenes_unshuffled)
     // shuffle the selected scenes before passing to the trial plugin 
     var selected_scenes = jsPsych.randomization.shuffle(selected_scenes_unshuffled);
@@ -568,7 +571,7 @@ var consent_screen = {
     what they will be doing, how their data will be used, and how they will be \
     remunerated.</p> \
     <p style='text-align:left'>This is a placeholder for that information.</p>",
-    choices: ["Yes, I consent to participate"],
+    choices: ["Yes, I consent"],
 };
 // This text needs to be updated! Will be whatever consent form we have ethics for, I assume
 
@@ -581,7 +584,7 @@ var instructions = {
             return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> Your task is to indicate how likely the sentence is to be true for the 4 cards.<br> \
-            We'll start with a practice question to get you familiarised with what the experiment looks like. \
+            We'll start with a practice question to get you familiarised with what the experiment will look like. \
             <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
         } else if (condition_assignment == "truth") {
             return "<h3>Instructions for experiment</h3> \
@@ -605,17 +608,18 @@ var instructions = {
 var exp_start = {
     type: jsPsychHtmlButtonResponse,
     stimulus:
-      "<h3>Start of the experiment</h3>\
-    <p style='text-align:left'>Now you hopefully feel familiarised with what the questions will look like. </p>\
+      "<h3>Start of the experiment</h3> \
+    <p style='text-align:left'>That is the practice part done, hopefully you now feel familiarised with what \
+    the questions will look like. </p> \
     <p style='text-align:left'>When you feel ready to start the real experiment, click Continue below.</p>",
     choices: ["Continue"],    
 }
 var final_screen = {
     type: jsPsychHtmlButtonResponse,
     stimulus:
-      "<h3>Finished!</h3>\
-    <p style='text-align:left'>Experiments often end with a final screen, e.g. that contains a completion\
-    code so the participant can claim their payment.</p>\
+      "<h3>Finished!</h3> \
+    <p style='text-align:left'>Experiments often end with a final screen, e.g. that contains a completion \
+    code so the participant can claim their payment.</p> \
     <p style='text-align:left'>Click Continue to finish the experiment and see your raw data.</p>",
     choices: ["Finish"],
 };
@@ -638,10 +642,9 @@ var demographics_survey = {
       "<p style='text-align:left'> <b>Demographics survey</b></p>\
                 <p style='text-align:left'> Finally, we would like to \
                 gather some background information about you. This will not be \
-                associated with any information that might identify you.</p>", 
-    html: "<p style='text-align:left'>What is your date of birth? <br> \
-                <input required name='dob' type='date'></p> \
-           <p style='text-align:left'>What is your first language?<br> \
+                associated with any information that might identify you and will not \
+                impact your pay for participating in this study.</p>", 
+    html: "<p style='text-align:left'>What is your first language?<br> \
                 <input required name='first_lang' type='text'></p> \
             <p style='text-align:left'>Was any other language spoken \
              in the home before the age of 6?<br>\
@@ -650,7 +653,6 @@ var demographics_survey = {
             <p style='text-align:left'>If you responded yes above, \
            which language(s)?<br>\
               <input name='other_lang' type='text'></p>",
-
   };
 
 // might want to add a check of if "Yes" to bilingual, require final question

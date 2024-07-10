@@ -29,7 +29,7 @@ console.log(condition_assignment);
 // response format and condition assignment determined above (to pass to trial building function).
 // if the response format is radio, set these values for each of the conditions:
 // (note that likelihood is not included here as we are not doing binary likelihood trials) 
-if (responseformat_assignment== "radio") { 
+if (responseformat_assignment == "radio") { 
   if (condition_assignment == "truth") {
       response_options = [  
           {name: "truth", text: "True"}, 
@@ -43,7 +43,7 @@ if (responseformat_assignment== "radio") {
           ];
       instruction = "<p><em>For the highlighted card, is the following description acceptable?</em></p>";
       }
-// or else, the response format is slider, and these values are chosen:
+// or else the response format is slider, and these values are chosen:
 } else { 
   if (condition_assignment == "truth") {
       response_options = ["Completely false", "Completely true"];
@@ -57,6 +57,13 @@ if (responseformat_assignment== "radio") {
       }
 }
 console.log(response_options);
+
+// store response format as a variable to use dynamically in the trial building function
+if (responseformat_assignment == "radio") {
+  plugin_type = jsPsychImageArrayMultiChoice; } 
+else { 
+  plugin_type = jsPsychImageArraySliderResponse; }
+console.log(plugin_type); 
 
 /******************************************************************************/
 /*** Training block ***********************************************************/
@@ -93,82 +100,139 @@ whether anything happens at this point or you just move on), then the "correct f
 outwith this functiont that determines how many times to run the whole training trial building function
 
 Potential issues:
-- since I have a if/else statement deciding which trial to run, I may not be able ro repeate what Maisy has done without making a very 
+- since I have a if/else statement deciding which trial to run, I may not be able ro repeat what Maisy has done without making a very 
 long piece of code... if there is a way to return the last variable and amend it, that's great, otherwise I'll have to reapeat the entire
 block of code with the if/else 
   - another idea; would there be less repition if I did a conditional timeline thing?
   - idea from Maisy: try to have the type be an argument of the function?? Most likely will be the same issue as when I tried doing
   function()if else as the parameter, but worth a try! 
   NOTE: seems to work to have type be dynamic now! So try to implement that for the training block
+
+How to call the function
+- will have the same 4 images for each of the 3 training trials, and the order of the trials will be static
+- images in a single trial will be shuffled, so can do that in the trial building function
+- so just have it loop through the 3 sets of images?
+- or call the function 3 times and input a different image set each time?
+  -- if so can build the image names in the function
+- note that need to keep track of which one is the target image for the binary ones, as this will be the one
+that needs to be highlighted for those trials
+
+How to let the function know what the correct answer is...
+- will depend on the individual trial and on the response format.
+Idea: have if else before function that will determine correct_answer?
+
+// Idea 1: Specify correct answers for both slider and radio in one. Then could check if last response is in correct_answer...?
+// Unsure it'll work... 
+if (target == "target-A") {
+  correct_answer = ["true", 80:100]; // the semicolon is an attempt at defining a range, but looks like it won't work like this
+  } else if (target == "target-B") {
+    correct_answer = ["true", 40:60];
+  } else if (target == "target-C") {
+    correct_answer = ["false", 0:20]; 
+  }
+
+  // Idea 2: split them up, so depends on response format (longer code but easier to make work?)
+if (responseformat_assignment == "radio") {
+  if (target == "target-A") {
+  correct_answer = "true"; 
+  } else if (target == "target-B") {
+    correct_answer = "true";
+  } else if (target == "target-C") {
+    correct_answer = "false"; 
+  }
+} else (responseformat_assignment == "slider") { 
+  if (target == "target-A") {
+    correct_answer = 80:100;  // the semicolon is an attempt at defining a range, but looks like it won't work like this
+    } else if (target == "target-B") {
+      correct_answer = 40:60;
+    } else if (target == "target-C") {
+      correct_answer = 0:20;
+    }
 */
 
+function make_training_trial(prompt, target, filler_1, filler_2, filler_3, correct_answer){
 
-function make_training_trial(response_format, plugin_type){
+  // build image file paths
+  var target_filename = "pilot_scenes/" + target + ".jpg"; 
+  var filler_1_filename = "pilot_scenes/training_stims/" + filler_1 + ".jpg";
+  var filler_2_filename = "pilot_scenes/training_stims/" + filler_2 + ".jpg";
+  var filler_3_filename = "pilot_scenes/training_stims/" + filler_3 + ".jpg";
+  // NOTE Probably a neater way to do this, at least for filler images! Just no brain power to see it rn
+
+  // put all the images together 
+  var images_unshuffled = [].concat(target_filename, filler_1_filename, filler_2_filename, filler_3_filename); 
+  console.log(images_unshuffled)
+  // shuffle the images before passing to the trial plugin 
+  var images = jsPsych.randomization.shuffle(images_unshuffled);
+  console.log(images)
+  console.log(images.indexOf(target_filename)) // gets index of target image in the array of selected scenes
+
+  // set the highlighted image index dependening on condition assignment 
+  if (condition_assignment == "likelihood") {
+      index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
+  } else {
+      index = images.indexOf(target_filename); // else the highlight is determined by the position of the target image
+  }   
 
   // a subtrial that builds the test trial
-  if (responseformat_assignment== "radio") {
-      // make trials using custom radio button plugin
-      var radio_training_trial = {
-          type: jsPsychImageArrayMultiChoice,
-          images: selected_scenes, // how scenes are selected will be different from the below
-          preamble: instruction, // this is set, so okay as is 
-          prompt: target_stim.prompt, // will also be different; want to just loop through a list, perhaps? or specify in function input
-          options: response_options, // this is set, so okay as is 
-          highlighted_image_index: index, // this will depend on target, like in test
+  var training_trial = {
+       type: plugin_type,
+       images: images,
+       preamble: instruction, // this is set, so okay as is 
+       prompt: prompt, // currently going with specifying this in function input
+       options: response_options, // this is set, so okay as is 
+       highlighted_image_index: index, // this will depend on target, like in test
 
-          //at the start of the trial, make a note of all relevant info to be saved
-          on_start: function (trial) { // NOTE: in main exp, the text in brackets matches name of the variable ("radio_training_trial")
-            // but want to test whether that is necessary or can just have it sat "trial" as Maisy has had it
-              trial.data = { // same here, this before said "radio_training_trial.data"
-                  condition: condition_assignment,
-                  response_format: "radio",
-                  target_truth_value: target_truth_value, 
-                  target_content_type: target_content_type, 
-                  linguistic_prompt: target_stim.prompt, 
-                  target_image: target_image_filename,
-                  //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                  //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
-                  images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
-                  };
-              },
-          on_finish: function (data) {
-              save_pragdep_data_line(data); //save the trial data
-              // add code here to store the most recent response, so that can be checked and used for feedback!
+       //at the start of the trial, make a note of all relevant info to be saved
+       on_start: function (trial) { // NOTE: in main exp, the text in brackets matches name of the variable ("training_trial")
+         // but want to test whether that is necessary or can just have it sat "trial" as Maisy has had it
+          trial.data = { // same here, this before said "training_trial.data"
+              condition: condition_assignment,
+              response_format: plugin_type,
+              block: "training", // remember to add the equivalent for testing block!
+              target_truth_value: "na", 
+              target_content_type: "na", 
+              linguistic_prompt: prompt, 
+              target_image: target_filename,
+              //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
+              //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
+              images_in_order: images, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+              // NOTE Not really necessary for training block, but might as well save it I guess?
+              };
           },
-      };
-      return radio_training_trial;
-  } else { 
-      // else make trials using custom slider plugin
-      var slider_training_trial = {
-          type: jsPsychImageArraySliderResponse,
-          images: selected_scenes,
-          preamble: instruction,
-          prompt: target_stim.prompt,
-          labels: response_options,
-          highlighted_image_index: index,
-         // slider_width: // can set this in pixels
+       on_finish: function (data) {
+        // add code here to store the most recent response, so that can be checked and used for feedback!
+        // NOTE apart from save_pragdep_data_line, the following bits here are not modified for this function, just
+        // copied from Maisy's code for now
+        choices = data.choices
+        data.target_position = choices.indexOf(correct_answer)
+        data.chosen_position = data.response
+        data.choice = choices[data.response]
+        if(data.choice === correct_answer){data.correct = true} // think this will be where I make it dependent on slider or radio
+        else {data.correct = false}
+        save_pragdep_data_line(data); //save the trial data -- COMMENT OUT when testing if don't want to use server!
+       },
+  };
 
-          //at the start of the trial, make a note of all relevant info to be saved
-          on_start: function (slider_training_trial) {
-              slider_training_trial.data = {
-                  condition: condition_assignment,
-                  response_format: "slider",
-                  target_truth_value: target_truth_value, 
-                  target_content_type: target_content_type, 
-                  linguistic_prompt: target_stim.prompt, 
-                  target_image: target_image_filename,
-                  //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                  //could be done from the csv during data processing, although tidiest if it's already saved in csv perhaps?
-                  images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
-                  };
-              },
-          on_finish: function (data) {
-              save_pragdep_data_line(data); //save the trial data
-          },
-      };
-      return slider_training_trial;
-  }
+  // a subtrial that appears if the participant chooses the wrong response
+
+
+   console.log(training_trial);
+   return training_trial;
+
+   /*
+   // This will be the bit that ties together all of the subtrials and hence the final output of the training trial building function:
+   var full_training_trial = {timeline:[training_trial,feedback_loop,correct_feedback]} // change name to "full_training_trial" oslt, makes more sense to me
+   // (even though it is a timeline - but that's how Kenny did it in W9)
+   console.log(full_training_trial);
+   return full_training_trial;*/
 }
+
+var training_trials = [
+  make_training_trial("The triangle is blue.", "target-A", "filler-A1", "filler-A2", "filler-A3", "true"),
+  make_training_trial("The square that is next to the triangle is green.", "target-B", "filler-B1", "filler-B2", "filler-B3", "true"),
+  make_training_trial("The circle is blue and is right of the triangle.", "target-C", "filler-C1", "filler-C2", "filler-C3", "false")
+];
 
 // builds a test trial
 function make_test_trial(image,prompt,buttons,correct_answer,fb_image){
@@ -300,7 +364,8 @@ function make_test_trial(image,prompt,buttons,correct_answer,fb_image){
               // save_data_line(data)
             },
             prompt: '<p style=font-size:20pt>' + "<b style=color:forestgreen>Correct!"}
-    var test_timeline = {timeline:[test,trial,correct_feedback]}
+    var test_timeline = {timeline:[test,trial,correct_feedback]} // change name to "full_training_trial" oslt, makes more sense to me
+    // (even though it is a timeline - but that's how Kenny did it in W9)
     return test_timeline
   }
 
