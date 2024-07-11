@@ -77,6 +77,7 @@ function save_pragdep_data_line(data) {
         participant_id,
         data.condition,
         data.response_format, // slider or radio buttons (this will also be clear from response, ofc)
+        data.block, // CHECK that this is being saved correctly (new on 11 July)
         data.trial_index,
         data.target_truth_value,
         data.target_content_type,
@@ -241,7 +242,7 @@ Ex:
 // want 3 trials; one clearly F, one clearly T, one in between 
 
 // UNDER CONSTRUCTION
-
+/*
 function make_training_trial(response_format){
     if (responseformat_assignment== "radio") {
         // make trials using custom radio button plugin
@@ -306,7 +307,7 @@ function make_training_trial(response_format){
         return slider_training_trial;
     } 
     
-}
+}*/
 /******************************************************************************/
 /*** Creating testing trials **************************************************/
 /******************************************************************************/
@@ -449,6 +450,7 @@ function make_trial(target_content_type) {
                 trial.data = {
                     condition: condition_assignment,
                     response_format: "radio",
+                    block: "test",
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
                     linguistic_prompt: target_stim.prompt, 
@@ -479,6 +481,7 @@ function make_trial(target_content_type) {
                 slider_trial.data = {
                     condition: condition_assignment,
                     response_format: "slider",
+                    block: "test",
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
                     linguistic_prompt: target_stim.prompt, 
@@ -543,6 +546,7 @@ var write_headers = {
         "\"participant_id\",\
         \"condition\",\
         \"response_format\",\
+        \"block\",\
         \"trial_index\",\
         \"target_truth_value\",\
         \"target_content_type\",\

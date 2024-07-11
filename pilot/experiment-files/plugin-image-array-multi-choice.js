@@ -109,8 +109,9 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
               var match = display_element.querySelector("#iamc-form");
               var response;
               if (match.querySelector("input[type=radio]:checked") !== null) {
-                  response = match.querySelector("input[type=radio]:checked").attributes["name"].value;
-                  // same here, needs to say "name" (not "data-name" which it was originally) for radio buttons to only allow one choice
+                  response = match.querySelector("input[type=radio]:checked").attributes["value"].value;
+                  // this is where the button response is recorded. Have changed the attributes to look for "value" instead of "name"
+                  // as it did previosuly. Was worried this would break it only allowing one button choice, but seems to work!
               } else {
                   response = "";
               }

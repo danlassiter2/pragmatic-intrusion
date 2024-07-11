@@ -58,7 +58,26 @@ else {
     plugin_type = jsPsychImageArraySliderResponse; }
 console.log(plugin_type);  
 
-function make_training_trial(){
+if (responseformat_assignment == "radio") {
+    if (target == "target-A") {
+    correct_answer = "true"; 
+    } else if (target == "target-B") {
+      correct_answer = "true";
+    } else if (target == "target-C") {
+      correct_answer = "false"; 
+    }
+  } else if (responseformat_assignment == "slider") { 
+    if (target == "target-A") {
+      correct_answer = {from: 80, to: 100};  
+      } else if (target == "target-B") {
+        correct_answer = {from: 40, to: 60};
+      } else if (target == "target-C") {
+        correct_answer = {from: 0, to: 20};
+      }
+  }
+console.log(correct_answer);
+
+function make_training_trial(correct_answer){
     var trial = {
         type: plugin_type,
         images: jsPsych.randomization.shuffle(
@@ -94,6 +113,8 @@ console.log(trial);
 return trial;
 };
 
+var target = "target-B"
+
 // FAILED attempt at looping; doesn't like the "filler_'" on line 99
 var filler_filenames = []
 var fillers = [filler_1, filler_2, filler_3];
@@ -104,9 +125,9 @@ for (var filler of fillers) {
 
 console.log(filler_filenames);
 
-var test_trial = make_training_trial();
-var test_trial2 = make_training_trial();
-var test_trial3 = make_training_trial();
+var test_trial = make_training_trial("target-B");
+var test_trial2 = make_training_trial("target-A");
+var test_trial3 = make_training_trial("target-C");
 
 var full_timeline = [].concat(test_trial, test_trial2, test_trial3);
 
