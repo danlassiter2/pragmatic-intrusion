@@ -134,7 +134,8 @@ if (target == "target-A") {
 var a = {
   from: 0,
   to: 100
-}; */
+}; 
+ */
 
 
 function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
@@ -183,21 +184,23 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
       }
   };
   console.log(correct_answer);
-  var correct_answer = correct_answer; // seems I have to store this for the variable below to be able to access it. Can't tell why!
+  var correct_answer = correct_answer; // seems I have to store this for the trial variable below to be able to access it. 
+  // Can't tell why, as e.g. "index" seems to be accesible even when it's not stored in a variable..!
 
-  // a subtrial that builds the test trial
+  // a subtrial that builds the training trial
   var training_trial = {
        type: plugin_type,
        images: images,
-       preamble: instruction, 
+       preamble: "<br>" + instruction, // adding white space above to avoid it jumping around if "incorrect" is shown after
        prompt: prompt, // currently going with specifying this in function input
        options: response_options, 
-       highlighted_image_index: index, // this will depend on target, like in test
+       highlighted_image_index: index, // this will depend on target, like in test (only relevant for non-prob trials)
 
        //at the start of the trial, make a note of all relevant info to be saved
        on_start: function (trial) { // NOTE: in main exp, the text in brackets matches name of the variable ("training_trial")
          // but want to test whether that is necessary or can just have it sat "trial" as Maisy has had it
-          trial.data = { // same here, this before said "training_trial.data"
+         // UPDATE Seems to work!
+          trial.data = { // same here, this before said "training_trial.data" UPDATE seems to work
               condition: condition_assignment,
               response_format: responseformat_assignment,
               block: "training", // remember to add the equivalent for testing block!
@@ -226,32 +229,151 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         console.log(data.correct); // evalutes correctly! TO DO Make it work with range for the slider trials...
         //save_pragdep_data_line(data); //save the trial data -- COMMENT OUT when testing if don't want to use server!
        },
-  };
+    };
+    console.log(training_trial);
+  //return training_trial;
 
   // a subtrial that appears if the participant chooses the wrong response
+  var incorrect_feedback = {
+    type: plugin_type,
+    images: images,
+    preamble: "<b style=color:red>Incorrect! Try again.</b><br>" + instruction, 
+    prompt: prompt,
+    options: response_options, 
+    highlighted_image_index: index, 
+
+    on_start: function (trial) { 
+      trial.data = {
+      condition: condition_assignment,
+      response_format: responseformat_assignment,
+      block: "training",
+      target_truth_value: "na", 
+      target_content_type: "na", 
+      linguistic_prompt: prompt, 
+      target_image: target_filename,
+      images_in_order: images, 
+      };
+    },
+    on_finish: function (data) {
+      // save to data property whether response was correct (=true) or incorrect (=false)
+      // think it needs to only check if response is in correct_answer; however, since the correct answer for slider
+      // is a range, may have to do something fancier than just "equals"... i.e. smth more like "is in array?"
+      // FOR NOW just seeing if I can make it work in general
+      if(data.response === correct_answer){data.correct = true} 
+      else {data.correct = false}
+      console.log(correct_answer); 
+      console.log(data.response); 
+      console.log(data.correct); // evalutes correctly! TO DO Make it work with range for the slider trials...
+      //save_pragdep_data_line(data); //save the trial data -- COMMENT OUT when testing if don't want to use server!
+      console.log(images);
+    },
+  };
 
   // a conditional node that tells to only show incorrect feedback if the most recent trial was answered incorrectly
+  var conditional_node = {
+    timeline: [incorrect_feedback],
+    conditional_function: function () {
+        var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct // gets what data.correct was stored as 
+        console.log(last_trial_correct);
+        if(last_trial_correct == false) { // if response in most recent trial was stored as false, i.e. incorrect, then
+          return true; // means we *will* run the incorrect_feedback timeline
+        } else {
+          return false; // means we will not
+        } 
+    }
+  };
 
   // a loop that says to show incorrect feedback every time the participant chooses the wrong answer
+  var retry_loop = {
+    timeline: [conditional_node],
+        loop_function: function () { // NOTE Removed "data" from brackets (Maisy had that) but seems to work anyway!
+          var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct
+          if(last_trial_correct == false) { // may have to put "false" in quotes
+            return true; // means we *will* run the conditional_node timeline
+          } else {
+            return false; // means we will not 
+          } 
+        },
+    };
 
   // a subtrial that appears if the participant chooses the correct response
+  // NOTE this currently doesn' store any of the data - CHECK if we need that (don't see why we would, only relevant
+  // thing to keep track of I'd guess is how many attempts a participant needs)
+  var correct_feedback = { // CHECK if it works for likelihood; worsk fine for binary truth
+    type: jsPsychHtmlButtonResponse, 
+    stimulus: function () {
+      // if the trial was a likelihood trial, show all four images in feedback
+      if (condition_assignment == "likelihood") {
+        return prompt + "<p><b style=color:forestgreen>Correct! The answer was " + correct_answer + ".<p>" +
+        "<img src=" + images[0] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" +
+        "<img src=" + images[1] + " style='border:3px solid lightgray; width:200px'>" +
+        "</br>" + // need to get this horizontal space to match the width of the vertical one! But CHECK w Dan whether we need to
+        // show the images again at all before spending more time on this
+        "<img src=" + images[2] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" + 
+        "<img src=" + images[3] + " style='border:3px solid lightgray; width:200px'>";
+      }
+      // otherwise, show only the target image
+      else {
+        return prompt + "<p><b style=color:forestgreen>Correct! The answer was " + correct_answer + ".<p>" + 
+        "<img src=" + target_filename + " style='border:3px solid lightgray; width:200px'>";
+      }
+    },
+    choices: ['Continue'],
+};
 
-   console.log(training_trial);
-   return training_trial;
+  // alternative correct feedback thing that would need work if we want to use!
+  /*var correct_feedback = {
+    type: plugin_type,
+    images: images,
+    preamble: instruction, 
+    prompt: '<p style=font-size:20pt>' + "<b style=color:forestgreen>Correct!", // may still want to include prompt
+    options: function(){
+      var last_trial = jsPsych.data.get().last(1).values()[0]
+      var response = last_trial.response
+      return response},
+    highlighted_image_index: index, 
 
-   /*
-   // This will be the bit that ties together all of the subtrials and hence the final output of the training trial building function:
-   var full_training_trial = {timeline:[training_trial,feedback_loop,correct_feedback]} // change name to "full_training_trial" oslt, makes more sense to me
-   // (even though it is a timeline - but that's how Kenny did it in W9 also)
-   console.log(full_training_trial);
-   return full_training_trial;*/
+    on_start: function (trial) { 
+      trial.data = {
+      condition: condition_assignment,
+      response_format: responseformat_assignment,
+      block: "training",
+      target_truth_value: "na", 
+      target_content_type: "na", 
+      linguistic_prompt: prompt, 
+      target_image: target_filename,
+      images_in_order: images, 
+      };
+    },
+    on_finish: function (data) {
+      // save to data property whether response was correct (=true) or incorrect (=false)
+      // think it needs to only check if response is in correct_answer; however, since the correct answer for slider
+      // is a range, may have to do something fancier than just "equals"... i.e. smth more like "is in array?"
+      // FOR NOW just seeing if I can make it work in general
+      if(data.response === correct_answer){data.correct = true} 
+      else {data.correct = false}
+      console.log(correct_answer); 
+      console.log(data.response); 
+      console.log(data.correct); // evalutes correctly! TO DO Make it work with range for the slider trials...
+      //save_pragdep_data_line(data);
+    },
+  };*/
+
+  // this ties together all of the subtrials and hence is the final output of the training trial building function:
+  var full_training_trial = { timeline: [training_trial, retry_loop, correct_feedback] }; 
+
+  return full_training_trial;
 }
 
+// call the function to build the 3 training trials and store in a variable to be run in the final timeline
 var training_trials = [
   make_training_trial("The triangle is blue.", "target-A", "filler-A1", "filler-A2", "filler-A3"),
   make_training_trial("The square that is next to the triangle is green.", "target-B", "filler-B1", "filler-B2", "filler-B3"),
   make_training_trial("The circle is blue and is right of the triangle.", "target-C", "filler-C1", "filler-C2", "filler-C3")
 ];
+
+jsPsych.run(training_trials);
+
 /*
 // builds a test trial
 function make_test_trial(image,prompt,buttons,correct_answer,fb_image){
@@ -387,6 +509,3 @@ function make_test_trial(image,prompt,buttons,correct_answer,fb_image){
     // (even though it is a timeline - but that's how Kenny did it in W9)
     return test_timeline
   }*/
-
-
-  jsPsych.run(training_trials);
