@@ -166,21 +166,21 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
   // The latter will be determined by "target", which is input to the trialb building function when calling it below
   if (responseformat_assignment == "radio") {
     if (target == "target-A") {
-    correct_answer = "True"; 
+    correct_answer = ["True", "Acceptable"]; 
     } else if (target == "target-B") {
-      correct_answer = "True";
+      correct_answer = ["True", "Acceptable"];
     } else if (target == "target-C") {
-      correct_answer = "False"; 
+      correct_answer = ["False", "Unacceptable"]; 
     }
   } else if (responseformat_assignment == "slider") { 
     // note that we specify fairly generous ranges for what counts as correct in slider trials, although we'd expect 
     // very close to exact values for these (as listed)
     if (target == "target-A") {
-      correct_answer = {from: 80, to: 100}; // expect 100 or close to
+      correct_answer = [90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
       } else if (target == "target-B") {
-        correct_answer = {from: 40, to: 60}; // expect 50 or close to
+        correct_answer = [{from: 40, to: 60}]; // expect 50 or close to
       } else if (target == "target-C") {
-        correct_answer = {from: 0, to: 20}; // expect 0 or close to 
+        correct_answer = [{from: 0, to: 20}]; // expect 0 or close to 
       }
   };
   console.log(correct_answer);
@@ -193,7 +193,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
        images: images,
        preamble: "<br>" + instruction, // adding white space above to avoid it jumping around if "incorrect" is shown after
        prompt: prompt, // currently going with specifying this in function input
-       options: response_options, 
+       options: response_options, // currently not working correctly for sliders - although might work when putting into main?
        highlighted_image_index: index, // this will depend on target, like in test (only relevant for non-prob trials)
 
        //at the start of the trial, make a note of all relevant info to be saved
@@ -216,7 +216,8 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         // save to data property whether response was correct (=true) or incorrect (=false)
         // think it needs to only check if response is in correct_answer; however, since the correct answer for slider
         // is a range, may have to do something fancier than just "equals"... i.e. smth more like "is in array?"
-        if(data.response === correct_answer){data.correct = true} 
+       // if(data.response === correct_answer){data.correct = true} // old way of checking when only one element in correct_answer
+        if(correct_answer.includes(data.response)){data.correct = true} 
         // NOTE: === is identity (i.e. will check for match and type), == is only looking for equality (so will check for match 
         // but not in type; e.g. the following will all return true: 1 == '1', 1 == 1, 1 == true)
         else {data.correct = false}
@@ -231,6 +232,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
        },
     };
     console.log(training_trial);
+    console.log(response_options);
   //return training_trial;
 
   // a subtrial that appears if the participant chooses the wrong response
@@ -259,7 +261,8 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
       // think it needs to only check if response is in correct_answer; however, since the correct answer for slider
       // is a range, may have to do something fancier than just "equals"... i.e. smth more like "is in array?"
       // FOR NOW just seeing if I can make it work in general
-      if(data.response === correct_answer){data.correct = true} 
+      //if(data.response === correct_answer){data.correct = true} // old way of checking when only one element in correct_answer
+      if(correct_answer.includes(data.response)){data.correct = true}  
       else {data.correct = false}
       console.log(correct_answer); 
       console.log(data.response); 
@@ -288,7 +291,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     timeline: [conditional_node],
         loop_function: function () { // NOTE Removed "data" from brackets (Maisy had that) but seems to work anyway!
           var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct
-          if(last_trial_correct == false) { // may have to put "false" in quotes
+          if(last_trial_correct == false) { 
             return true; // means we *will* run the conditional_node timeline
           } else {
             return false; // means we will not 
@@ -299,12 +302,16 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
   // a subtrial that appears if the participant chooses the correct response
   // NOTE this currently doesn' store any of the data - CHECK if we need that (don't see why we would, only relevant
   // thing to keep track of I'd guess is how many attempts a participant needs)
-  var correct_feedback = { // CHECK if it works for likelihood; worsk fine for binary truth
+  var correct_feedback = { // works, but need some finetuning for how we store correct_answer for slider trials (see lines 175-185)
     type: jsPsychHtmlButtonResponse, 
     stimulus: function () {
       // if the trial was a likelihood trial, show all four images in feedback
+      //var answer = jsPsych.data.get().last(1).values()[0].response; // store response from most recent trial (i.e. the correct one)
+      // NOTE used this for showing the answer in feedback, but looks funny with slider trials so have to modify this if we want to use it
       if (condition_assignment == "likelihood") {
-        return prompt + "<p><b style=color:forestgreen>Correct! The answer was " + correct_answer + ".<p>" +
+        return prompt + "<p><b style=color:forestgreen>Correct! </p>" +
+        // The answer is \"" + answer + "\".<p>" + 
+        // OBS! Looks funny to say correct! The answer is N for slider trials, so just leaving out for now
         "<img src=" + images[0] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" +
         "<img src=" + images[1] + " style='border:3px solid lightgray; width:200px'>" +
         "</br>" + // need to get this horizontal space to match the width of the vertical one! But CHECK w Dan whether we need to
@@ -314,7 +321,8 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
       }
       // otherwise, show only the target image
       else {
-        return prompt + "<p><b style=color:forestgreen>Correct! The answer was " + correct_answer + ".<p>" + 
+        return prompt + "<p><b style=color:forestgreen>Correct! </p>" + // doesn't make sense to tell them the number so just saying
+        // correct - also changed this for the likelihood trials
         "<img src=" + target_filename + " style='border:3px solid lightgray; width:200px'>";
       }
     },
