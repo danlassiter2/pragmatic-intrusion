@@ -58,7 +58,7 @@ if (responseformat_assignment == "radio") {
 }
 console.log(response_options);
 
-// store response format as a variable to use dynamically in the trial building function
+// set respomse format to use dynamically in the trial building function
 if (responseformat_assignment == "radio") {
   plugin_type = jsPsychImageArrayMultiChoice; } 
 else { 
@@ -176,11 +176,11 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     // note that we specify fairly generous ranges for what counts as correct in slider trials, although we'd expect 
     // very close to exact values for these (as listed)
     if (target == "target-A") {
-      correct_answer = [90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
+      correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
       } else if (target == "target-B") {
-        correct_answer = [{from: 40, to: 60}]; // expect 50 or close to
+        correct_answer = [40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60]; // expect 50 or close to
       } else if (target == "target-C") {
-        correct_answer = [{from: 0, to: 20}]; // expect 0 or close to 
+        correct_answer = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; // expect 0 or close to 
       }
   };
   console.log(correct_answer);
