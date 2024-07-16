@@ -129,22 +129,21 @@ if (responseformat_assignment == "radio") {
     plugin_type = jsPsychImageArraySliderResponse; }
   console.log(plugin_type); */
 
-// pick a random condition + set response format to depend on this for the trial building function
+// pick a random condition + set plugin to depend on response format assignment for the training trial building function
 // Note that if radio is chosen above, it only chooses between acceptability and truth 
 // (not likelihood, as that's too unnatural and likely won't provide interesting data)
 if (responseformat_assignment == "radio") { 
     var condition_assignment = 
         jsPsych.randomization.sampleWithoutReplacement(["truth", "acceptability"], 1)[0];
     // also when response format is radio, set plugin type to be radio button plugin (to be used dynamically in the trial building function)
-    plugin_type = jsPsychImageArrayMultiChoice;
+    var plugin_type = jsPsychImageArrayMultiChoice;
 } else {
     var condition_assignment = 
         jsPsych.randomization.sampleWithoutReplacement(["truth", "acceptability", "likelihood"], 1)[0];
     // and again, when response format is slider, set plugin to be slider plugin
-    plugin_type = jsPsychImageArraySliderResponse;
+    var plugin_type = jsPsychImageArraySliderResponse;
 }
 console.log(condition_assignment);
-console.log(plugin_type); // CHECK if this is working properly! May need to assign it to a variable rather than just set it
 
 // Set the text and names for the response options and the instructions in a trial based on
 // response format and condition assignment determined above (to pass to trial building function).
@@ -256,9 +255,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     // put all the images together 
     var images_unshuffled = [].concat(target_filename, filler_1_filename, filler_2_filename, filler_3_filename); 
     console.log(images_unshuffled)
-    images_to_preload.push(images_unshuffled);
-    console.log(images_to_preload); // CHECK if need the above to use spread in case it puts to avoided nested array in images_to_preload
-    // shuffle the images before passing to the trial plugin 
+    images_to_preload.push(...images_unshuffled); // using spread to avoid preload list having a nested array; seems to work
     var images = jsPsych.randomization.shuffle(images_unshuffled);
     console.log(images)
     console.log(images.indexOf(target_filename)) // gets index of target image in the array of images
@@ -304,7 +301,11 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         images: images,
         preamble: "<br>" + instruction, // adding white space above to avoid it jumping around if "incorrect" is shown after
         prompt: prompt, // currently going with specifying this in function input
-        options: response_options, // currently not working correctly for sliders - although might work when putting into main?
+        labels: response_options, // currently not working correctly for sliders - although might work when putting into main?
+        // think it may be because slider plugin has the parameter called "labels", and radio plugin has "options"!
+        // yep, that's right! So either have type not be dynamic and build this function like test trial, or change name of parameter
+        // in radio plugin (if possible)
+        // NOTE Pro type not dynamic: can set slider width. Con: Code for training block will be v long and repetitive..
         highlighted_image_index: index, // this will depend on target, like in test (only relevant for non-prob trials)
 
         //at the start of the trial, make a note of all relevant info to be saved
@@ -338,12 +339,11 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             // is also what happens in the main exp! UPDATE Have fixed that, now it stores the actual text of the button (note; is
             // case-sensitive!)
             console.log(data.correct); // evalutes correctly! TO DO Make it work with range for the slider trials...
-            //save_pragdep_data_line(data); //save the trial data -- COMMENT OUT when testing if don't want to use server!
+            save_pragdep_data_line(data); //save the trial data 
         },
     };
         console.log(training_trial);
         console.log(response_options);
-    //return training_trial;
 
     // a subtrial that appears if the participant chooses the wrong response
     var incorrect_feedback = {
@@ -351,7 +351,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         images: images,
         preamble: "<b style=color:red>Incorrect! Try again.</b><br>" + instruction, 
         prompt: prompt,
-        options: response_options, 
+        labels: response_options, 
         highlighted_image_index: index, 
 
         on_start: function (trial) { 
@@ -374,7 +374,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             console.log(correct_answer); 
             console.log(data.response); 
             console.log(data.correct);
-            save_pragdep_data_line(data); //save the trial data -- COMMENT OUT when testing if don't want to use server!
+            save_pragdep_data_line(data); //save the trial data 
             console.log(images);
         },
     };
@@ -583,7 +583,7 @@ function make_trial(target_content_type) {
             images: selected_scenes, 
             preamble: instruction, 
             prompt: target_stim.prompt,
-            options: response_options,
+            labels: response_options,
             highlighted_image_index: index,
 
             //at the start of the trial, make a note of all relevant info to be saved
@@ -718,7 +718,7 @@ var consent_screen = {
     <p style='text-align:left'>This is a placeholder for that information.</p>",
     choices: ["Yes, I consent"],
 };
-// This text needs to be updated! Will be whatever consent form we have ethics for, I assume
+// This text needs to be updated! Will be whatever consent form we have ethics for, I assume CHECK NOTE
 
 // Instructions will depend on condition assignment, so made the stimulus parameter dynamic by using a function
 // that checks what the condition assignment is and returns the corresponding instructions
@@ -729,21 +729,21 @@ var instructions = {
             return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> Your task is to indicate how likely the sentence is to be true for the 4 cards.<br> \
-            We'll start with a practice question to get you familiarised with what the experiment will look like. \
+            We'll start with three practice questions.  \
             <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
         } else if (condition_assignment == "truth") {
             return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
             the sentence is true for <u>the highlighted card</u> only.<br> \
-            We'll start with a practice question to get you familiarised with what the experiment will look like. \
+            We'll start with three practice questions. \
             <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
         } else if (condition_assignment == "acceptability") {
             return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
             the sentence is acceptable for <u>the highlighted card</u> only.<br> \
-            We'll start with a practice question to get you familiarised with what the experiment will look like. \
+            We'll start with three practice questions. \
             <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
         }
     }, 
@@ -755,17 +755,17 @@ var exp_start = {
     stimulus:
       "<h3>Start of the experiment</h3> \
     <p style='text-align:left'>That is the practice part done, hopefully you now feel familiarised with what \
-    the questions will look like. </p> \
-    <p style='text-align:left'>When you feel ready to start the real experiment, click Continue below.</p>",
+    the questions will look like. For the real experiment, the answers might not always be as clear as with the practice questions. \
+    Please just give the answer you feel is most appropriate. </p> \
+    <p style='text-align:left'>When you feel ready to start, click Continue below.</p>",
     choices: ["Continue"],    
 }
 var final_screen = {
     type: jsPsychHtmlButtonResponse,
     stimulus:
       "<h3>Finished!</h3> \
-    <p style='text-align:left'>Experiments often end with a final screen, e.g. that contains a completion \
-    code so the participant can claim their payment.</p> \
-    <p style='text-align:left'>Click Continue to finish the experiment and see your raw data.</p>",
+    <p style='text-align:left'>Thank you for taking part!</p> \
+    <p style='text-align:left'>Click Finish to complete the experiment and see your raw data.</p>",
     choices: ["Finish"],
 };
 
@@ -798,6 +798,22 @@ var demographics_survey = {
             <p style='text-align:left'>If you responded yes above, \
            which language(s)?<br>\
               <input name='other_lang' type='text'></p>",
+                          //at the start of the trial, make a note of all relevant info to be saved
+    on_start: function (trial) {
+        trial.data = {
+            condition: condition_assignment,
+            response_format: "radio",
+            block: "demo_survey",
+            target_truth_value: target_truth_value, // seems to work even when name is the same for both
+            target_content_type: target_content_type, // seems to work even when name is the same for both
+            linguistic_prompt: target_stim.prompt, 
+            target_image: target_image_filename,
+            images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+        };
+    },
+    on_finish: function (data) {
+        save_pragdep_data_line(data); //save the trial data
+    },
   };
 
 // might want to add a check of if "Yes" to bilingual, require final question

@@ -23,14 +23,14 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
             pretty_name: "Prompt",
             default: undefined,
           },
-          labels: {
+          options: {
             type: jspsych.ParameterType.COMPLEX,
-            pretty_name: "Labels",
+            pretty_name: "Options",
             array: true,
             nested: {
               name: { 
                 type: jspsych.ParameterType.STRING,
-                pretty_name: "Option name", // would I need to also change this for it to work...?
+                pretty_name: "Option name",
                 default: undefined
               },
               text: {
@@ -78,10 +78,10 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
           html += `<div id="iamc-preamble">${trial.preamble}</div>\n`;
           // and prompt
           html += `<div id="iamc-prompt">${trial.prompt}</div>\n`;
-          // and labels
-          html += '<div id="iamc-labels">\n<br>'
+          // and options
+          html += '<div id="iamc-options">\n<br>'
           let idx=0;
-          for (let option of trial.labels) {
+          for (let option of trial.options) {
             let input_id = `iamc-radio-${idx}`;
             html += '<div class="iamc-option">\n';
             html += `<input type="radio" id="${input_id}" value="${option.text}" name="${option.name}"></input>\n`; 
@@ -147,7 +147,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
           let rt = 1000;
           for (const q of trial.questions) {
               const name = q.name ? q.name : `Q${trial.questions.indexOf(q)}`;
-              question_data[name] = this.jsPsych.randomization.sampleWithoutReplacement(q.labels, 1)[0];
+              question_data[name] = this.jsPsych.randomization.sampleWithoutReplacement(q.options, 1)[0];
               rt += this.jsPsych.randomization.sampleExGaussian(1500, 400, 1 / 200, true);
           }
           const default_data = {
@@ -172,7 +172,7 @@ var jsPsychImageArrayMultiChoice = (function (jspsych) {
           load_callback();
           const answers = Object.entries(data.response);
           for (let i = 0; i < answers.length; i++) {
-              this.jsPsych.pluginAPI.clickTarget(display_element.querySelector(`#jspsych-survey-multi-choice-response-${i}-${trial.questions[i].labels.indexOf(answers[i][1])}`), ((data.rt - 1000) / answers.length) * (i + 1));
+              this.jsPsych.pluginAPI.clickTarget(display_element.querySelector(`#jspsych-survey-multi-choice-response-${i}-${trial.questions[i].options.indexOf(answers[i][1])}`), ((data.rt - 1000) / answers.length) * (i + 1));
           }
           this.jsPsych.pluginAPI.clickTarget(display_element.querySelector("#jspsych-survey-multi-choice-next"), data.rt);
       }
