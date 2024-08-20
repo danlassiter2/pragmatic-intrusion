@@ -407,7 +407,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     };
 
     // a subtrial that appears if the participant chooses the correct response
-    // NOTE this currently doesn' store any of the data - CHECK if we need that (don't see why we would, only relevant
+    // NOTE this currently doesn't store any of the data - CHECK if we need that (don't see why we would, only relevant
     // thing to keep track of I'd guess is how many attempts a participant needs)
     var correct_feedback = { // works, but need some finetuning for how we store correct_answer for slider trials (see lines 175-185)
         type: jsPsychHtmlButtonResponse, 
@@ -416,9 +416,18 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         //var answer = jsPsych.data.get().last(1).values()[0].response; // store response from most recent trial (i.e. the correct one)
         // NOTE used the above line of code for showing the answer in feedback, but looks funny with slider trials so have to modify this if we want to use it
         if (condition_assignment == "likelihood") {
-            return prompt + "<p><b style=color:forestgreen>Correct! </p>" +
+            return prompt + "<p><b style=color:forestgreen>Correct! Here, if a card is picked at random" + 
+            // attempt at making the feeedback be specific to the training trial. NB NOT TESTED
+                function() {
+                if (target == "target-A") {
+                    return "the sentence is completely true.</p>";
+                } else if (target == "target-B") {
+                    return "there is an even chance the sentence is true.</p>";
+                } else if (target == "target-C") {
+                    return "the sentence is completely false.</p>";
+                }
+             } +
             // The answer is \"" + answer + "\".<p>" + 
-            // OBS! Looks funny to say correct! The answer is N for slider trials, so just leaving out for now
             "<img src=" + images[0] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" +
             "<img src=" + images[1] + " style='border:3px solid lightgray; width:200px'>" +
             "</br>" + // need to get this horizontal space to match the width of the vertical one! But CHECK w Dan whether we need to
@@ -426,10 +435,11 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             "<img src=" + images[2] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" + 
             "<img src=" + images[3] + " style='border:3px solid lightgray; width:200px'>";
         }
-        // otherwise, show only the target image
+        // otherwise, show only the target image 
         else {
             return prompt + "<p><b style=color:forestgreen>Correct! </p>" + // doesn't make sense to tell them the number so just saying
             // correct - also changed this for the likelihood trials
+            // IDEA Can maybe have an if/else statement in the "return"? Which will depend on whether it is radio or slider
             "<img src=" + target_filename + " style='border:3px solid lightgray; width:200px'>";
         }
         },
@@ -730,21 +740,21 @@ var instructions = {
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> Your task is to indicate how likely the sentence is to be true for the 4 cards.<br> \
             We'll start with three practice questions.  \
-            <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
+            <p style='text-align:left'>When you feel ready, click Continue below to start the practice section.</p>";
         } else if (condition_assignment == "truth") {
             return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
             the sentence is true for <u>the highlighted card</u> only.<br> \
             We'll start with three practice questions. \
-            <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
+            <p style='text-align:left'>When you feel ready, click Continue below to start the practice section.</p>";
         } else if (condition_assignment == "acceptability") {
             return "<h3>Instructions for experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
             <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
             the sentence is acceptable for <u>the highlighted card</u> only.<br> \
             We'll start with three practice questions. \
-            <p style='text-align:left'>When you feel ready, click Continue below to see the practice question.</p>";
+            <p style='text-align:left'>When you feel ready, click Continue below to start the practice section.</p>";
         }
     }, 
     choices: ["Continue"],
