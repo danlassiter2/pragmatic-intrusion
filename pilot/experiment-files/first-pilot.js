@@ -85,7 +85,8 @@ function save_pragdep_data_line(data) {
         participant_id,
         data.condition,
         data.response_format, // slider or radio buttons (this will also be clear from response, ofc)
-        data.block, // CHECK that this is being saved correctly (new on 11 July)
+        data.block, // traning or test
+        data.trial_counter,
         data.trial_index,
         data.target_truth_value,
         data.target_content_type,
@@ -347,6 +348,10 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     var correct_answer = correct_answer; // seems I have to store this for the trial variable below to be able to access it. 
     // Can't tell why, as e.g. "index" seems to be accesible even when it's not stored in a variable..!
 
+    // Counter variable for storing how often a trainig trial was retaken; it will start from 1 every time the training trial building
+    // function is called, i.e. it will reset to 1 for each of the three trials
+    var trial_counter = 1; 
+
     // a subtrial that builds the training trial
     var training_trial = {
         type: plugin_type,
@@ -368,6 +373,8 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
                 condition: condition_assignment,
                 response_format: responseformat_assignment,
                 block: "training", 
+                trial_counter: trial_counter, // starts off with the value set outside of the plugin, i.e. 1, will be added to (+1) 
+                // every time the incorrect_feedback is shown, i.e. every time the participant is prompted to try again
                 target_truth_value: "na", 
                 target_content_type: "na", 
                 linguistic_prompt: prompt, 
@@ -411,6 +418,9 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
                 condition: condition_assignment,
                 response_format: responseformat_assignment,
                 block: "training",
+                trial_counter: ++trial_counter, // this means it will add 1 to whatever the variable is now. Note: ++ needs to come 
+                // before the variable to return the incremented number (if it comes after it will return the value of the variable
+                // before it was incremented on, which is not useful here)
                 target_truth_value: "na", 
                 target_content_type: "na", 
                 linguistic_prompt: prompt, 
@@ -523,14 +533,13 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             // The answer is \"" + answer + "\".<p>" + 
             "<img src=" + images[0] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" +
             "<img src=" + images[1] + " style='border:3px solid lightgray; width:200px'>" +
-            "</br>" + // need to get this horizontal space to match the width of the vertical one! But CHECK w Dan whether we need to
-            // show the images again at all before spending more time on this
+            "</br>" + // need to get this horizontal space to match the width of the vertical one ideally! 
             "<img src=" + images[2] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" + 
             "<img src=" + images[3] + " style='border:3px solid lightgray; width:200px'>";
         }
         // otherwise, show only the target image 
         else {
-            return prompt + "<p><b style=color:forestgreen>Correct! For the highlighted card, </br>the sentence is " + correct_response + 
+            return prompt + "<p><b style=color:forestgreen>Correct! For the highlighted card </br>the sentence is " + correct_response + 
             "<img src=" + target_filename + " style='border:3px solid lightgray; width:200px'>";
         }
         },
@@ -772,6 +781,7 @@ var write_headers = {
         \"condition\",\
         \"response_format\",\
         \"block\",\
+        \"trial_counter\",\
         \"trial_index\",\
         \"target_truth_value\",\
         \"target_content_type\",\
