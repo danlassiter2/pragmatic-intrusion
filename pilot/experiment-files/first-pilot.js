@@ -86,8 +86,10 @@ function save_pragdep_data_line(data) {
         data.condition,
         data.response_format, // slider or radio buttons (this will also be clear from response, ofc)
         data.block, // traning or test
-        data.trial_counter,
+        data.training_trial_counter,
+        data.test_trial_counter,
         data.trial_index,
+        data.failed_images, // records if any of the images failed to preload
         data.target_truth_value,
         data.target_content_type,
         data.linguistic_prompt,
@@ -124,7 +126,8 @@ function save_survey_line(data) {
       survey_data.first_lang,
       survey_data.bilingual,
       survey_data.other_lang,
-      survey_data.colourblind
+      survey_data.colourblind,
+      survey_data.feedback
     ];
 
     // add quotation marks around each element that is saved to avoid splitting prompts that have commas
@@ -348,9 +351,9 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     var correct_answer = correct_answer; // seems I have to store this for the trial variable below to be able to access it. 
     // Can't tell why, as e.g. "index" seems to be accesible even when it's not stored in a variable..!
 
-    // Counter variable for storing how often a trainig trial was retaken; it will start from 1 every time the training trial building
+    // Counter variable for storing how often a training trial was retaken; it will start from 1 every time the training trial building
     // function is called, i.e. it will reset to 1 for each of the three trials
-    var trial_counter = 1; 
+    var training_trial_counter = 1; 
 
     // a subtrial that builds the training trial
     var training_trial = {
@@ -373,8 +376,9 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
                 condition: condition_assignment,
                 response_format: responseformat_assignment,
                 block: "training", 
-                trial_counter: trial_counter, // starts off with the value set outside of the plugin, i.e. 1, will be added to (+1) 
+                training_trial_counter: training_trial_counter, // starts off with the value set outside of the plugin, i.e. 1, will be added to (+1) 
                 // every time the incorrect_feedback is shown, i.e. every time the participant is prompted to try again
+                test_trial_counter: "na", 
                 target_truth_value: "na", 
                 target_content_type: "na", 
                 linguistic_prompt: prompt, 
@@ -418,9 +422,10 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
                 condition: condition_assignment,
                 response_format: responseformat_assignment,
                 block: "training",
-                trial_counter: ++trial_counter, // this means it will add 1 to whatever the variable is now. Note: ++ needs to come 
+                training_trial_counter: ++training_trial_counter, // this means it will add 1 to whatever the variable is now. Note: ++ needs to come 
                 // before the variable to return the incremented number (if it comes after it will return the value of the variable
                 // before it was incremented on, which is not useful here)
+                test_trial_counter: "na",
                 target_truth_value: "na", 
                 target_content_type: "na", 
                 linguistic_prompt: prompt, 
@@ -586,8 +591,13 @@ content type + prompt at the moment. However, the code is written so that it can
 more images per contcontent type + prompt combination later.
 */
 
+// Counter variable for storing how the index of a test trial; it will start from 1 and be incremented by +1 every time 
+// the function is called below, i.e. every time the loop loops. Then when saving each trial it will take the trial from
+// this variable
+var test_trial_counter = 1;
+
 // function to create the trials
-function make_trial(target_content_type) {
+function make_test_trial(target_content_type) {
     // make array with all possible truth value combinations
     var truth_values = ["tt","tf","ft","ff"];
     // randomly select one of them to be the target truth value in a trial
@@ -685,6 +695,9 @@ function make_trial(target_content_type) {
                     condition: condition_assignment,
                     response_format: "radio",
                     block: "test",
+                    training_trial_counter: "na",
+                    test_trial_counter: test_trial_counter, // set to whatever value this has been set to after looping through 
+                    // trial building function below
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
                     linguistic_prompt: target_stim.prompt, 
@@ -716,6 +729,9 @@ function make_trial(target_content_type) {
                     condition: condition_assignment,
                     response_format: "slider",
                     block: "test",
+                    training_trial_counter: "na",
+                    test_trial_counter: test_trial_counter, // set to whatever value this has been set to after looping through 
+                    // trial building function below
                     target_truth_value: target_truth_value, // seems to work even when name is the same for both
                     target_content_type: target_content_type, // seems to work even when name is the same for both
                     linguistic_prompt: target_stim.prompt, 
@@ -740,10 +756,12 @@ function make_trial(target_content_type) {
 // goes in the timeline at the end 
 var test_trials = []
 for (target_content_type of target_content_types) {
-        single_trial = make_trial(target_content_type);
+        single_trial = make_test_trial(target_content_type);
         test_trials.push(single_trial);
+        ++test_trial_counter; // adds 1 to this every time it goes through the loop, i.e. every time a trial is built
 }
 console.log(test_trials);
+console.log(test_trial_counter);
 
 // just for having a reference point to check all trials are being shown as expected - REMOVE LATER
 var next_trial = {
@@ -773,7 +791,7 @@ console.log(preload);
 var write_headers = {
     type: jsPsychCallFunction,
     func: function () {
-      var this_participant_filename = "pragdep/pragdep_" + participant_id + ".csv"; // NOTE May CHANGE participant_id if doing the prolific thing
+      var this_participant_filename = "pragdep/pragdep_" + participant_id + ".csv";
       //write column headers to pragdep_pilot_data.csv, with quotes around to match code saving line by line 
       save_data(
         this_participant_filename,
@@ -781,8 +799,10 @@ var write_headers = {
         \"condition\",\
         \"response_format\",\
         \"block\",\
-        \"trial_counter\",\
+        \"training_trial_count\",\
+        \"test_trial_count\",\
         \"trial_index\",\
+        \"failed_images\",\
         \"target_truth_value\",\
         \"target_content_type\",\
         \"linguistic_prompt\",\
@@ -813,7 +833,8 @@ var write_survey_headers = {
         \"first_lang\",\
         \"bilingual\",\
         \"other_lang\",\
-        \"colourblind\"\n" 
+        \"colourblind\",\
+        \"feedback\"\n" 
       );
     },
   };
@@ -840,24 +861,24 @@ var instructions = {
     type: jsPsychHtmlButtonResponse,
     stimulus: function(){
         if (condition_assignment == "likelihood") {
-            return "<h3>Instructions for experiment</h3> \
+            return "<h3>Instructions for the experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
-            <p style='text-align:left'> Your task is to indicate how likely the sentence is to be true for the 4 cards.<br> \
-            We'll start with three practice questions.  \
+            <p style='text-align:left'>Your task is to indicate how likely the sentence is to be true for the 4 cards.<br> \
+            <p style='text-align:left'>We'll start with three practice questions.</p>  \
             <p style='text-align:left'>When you feel ready, click Continue below to start the practice section.</p>";
         } else if (condition_assignment == "truth") {
-            return "<h3>Instructions for experiment</h3> \
+            return "<h3>Instructions for the experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
-            <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
+            <p style='text-align:left'>One of the cards will be highlighted with a red dashed line. Your task is to indicate<br>whether \
             the sentence is true for <u>the highlighted card</u> only.<br> \
-            We'll start with three practice questions. \
+            <p style='text-align:left'>We'll start with three practice questions.</p> \
             <p style='text-align:left'>When you feel ready, click Continue below to start the practice section.</p>";
         } else if (condition_assignment == "acceptability") {
-            return "<h3>Instructions for experiment</h3> \
+            return "<h3>Instructions for the experiment</h3> \
             <p style='text-align:left'>In each question, you will see a set of 4 cards and a sentence describing the cards.</p> \
-            <p style='text-align:left'> One of the cards will be highlighted with a red dashed line. Your task is to indicate whether \
+            <p style='text-align:left'>One of the cards will be highlighted with a red dashed line. Your task is to indicate<br>whether \
             the sentence is acceptable for <u>the highlighted card</u> only.<br> \
-            We'll start with three practice questions. \
+            <p style='text-align:left'>We'll start with three practice questions.</p> \
             <p style='text-align:left'>When you feel ready, click Continue below to start the practice section.</p>";
         }
     }, 
@@ -868,8 +889,8 @@ var exp_start = {
     type: jsPsychHtmlButtonResponse,
     stimulus:
       "<h3>Start of the experiment</h3> \
-    <p style='text-align:left'>That is the practice part done. Next we will start the real experiment.<br> \
-    In some of the following questions the response might not be obvious.<br> \
+    <p style='text-align:left'>That is the practice part done. Next we will start the real experiment.</p> \
+    <p style='text-align:left'>In some of the following questions the response might not be obvious.<br> \
     Just respond with your first intuition and don't overthink it. </p> \
     <p style='text-align:left'>When you feel ready to start, click Continue below.</p>",
     choices: ["Continue"],    
@@ -884,47 +905,50 @@ var final_screen = {
 };
 
 /******************************************************************************/
-/*** Feedback and demographics ******************************************************/
+/*** Demographics and feedback ************************************************/
 /******************************************************************************/
 
-var feedback = {
+// old way of doing feedback, changed to doing everything in one plugin as that was easier for saving to the same csv
+/*var feedback = {
     type: jsPsychSurveyText,
-    preamble: "<p style='text-align:left'> <b>Feedback</b></p>",
+    preamble: "<h3>Feedback</h3>", //"<p style='text-align:left'> <b>Feedback</b></p>",
     questions: [
       {prompt: 'Do you have any comments about this experiment?', rows: 5, name: 'feedback'}
-    ]
+    ],
+    on_finish: function (data) {
+        console.log(data); //let me see the data in the console
+        /*,
+    on_finish: function (data) {
+        save_survey_line(data); //save the feedback data in survey csv
+    },
   }
+}*/
 
-var demographics_survey = {
+var demographics_and_feedback = {
     type: jsPsychSurveyHtmlForm,
     preamble:
       "<p style='text-align:left'> <b>Demographics survey</b></p>\
                 <p style='text-align:left'> Finally, we would like to \
                 gather some background information about you. This will not be \
-                associated with any information that might identify you and will not \
+                associated with <br>any information that might identify you and will not \
                 impact your pay for participating in this study.</p>", 
     html: "<p style='text-align:left'>What is your first language?<br> \
                 <input required name='first_lang' type='text'></p> \
             <p style='text-align:left'>Was any other language spoken \
              in the home before the age of 6?<br>\
-                <input required name='bilingual' type='radio'><label>Yes</label> \
-                <input required name='bilingual' type='radio'><label>No</label></p> \
+                <input required name='bilingual' type='radio' value='yes'><label>Yes</label> \
+                <input required name='bilingual' type='radio' value='no'><label>No</label></p> \
             <p style='text-align:left'>If you responded yes above, \
            which language(s)?<br>\
               <input name='other_lang' type='text'></p> \
-            <p style='text-align:left'>Do you experience colourblidness?<br> \
-                <input required name='colourblind' type='radio'><label>Yes</label> \
-                <input required name='colourblind' type='radio'><label>No</label></p>",
-    //at the start of the trial, make a note of all relevant info to be saved
-    /*on_start: function (trial) {
-        trial.data = { // find out how to extract the relevant info! 
-            first_lang: first_lang,
-            bilingual: bilingual,
-            other_lang: other_lang,
-            colourblind: colourblind,
-        };
-    },*/
+            <p style='text-align:left'>Do you experience colourblindness?<br> \
+                <input required name='colourblind' type='radio' value='yes'><label>Yes</label> \
+                <input required name='colourblind' type='radio' value='no'><label>No</label></p> \
+            <p style='text-align:left'> <b>Feedback</b></p> \
+                <p style='text-align:left'>Do you have any comments about this experiment?<br> \
+                <input name='feedback' type='text'></p>",
     on_finish: function (data) {
+        console.log(data); //let me see the data in the console
         save_survey_line(data); //save the survey data
     },
   };
@@ -947,8 +971,8 @@ var full_timeline = [].concat(
     exp_start, 
     test_trials,
     next_trial,
-    feedback,
-    demographics_survey,
+    //feedback,
+    demographics_and_feedback,
     final_screen
 );
 
