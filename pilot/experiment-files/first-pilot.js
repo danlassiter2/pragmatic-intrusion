@@ -822,8 +822,8 @@ var consent_screen = {
     \
     <p style='text-align:left'> <b>Nature of the study.</b> You are invited to participate in a study which involves carefully reading sentences \
     about images showing different shapes and colours, and answering questions about the sentences and images. Once you finish, we also have some \
-    questions about your experience (e.g., language background). Your responses will be recorded. Your session should last for up to \
-    [will be determined based on internal piloting] minutes. You will be given full instructions shortly.</p> \
+    questions about your experience (e.g. language background). Your responses will be recorded. Your session should last around 8 minutes. \
+    You will be given full instructions shortly.</p> \
     \
     <p style='text-align:left'> <b>Compensation.</b> You will be paid at the posted rate for your participation in this study.</p> \
     \
@@ -832,20 +832,20 @@ var consent_screen = {
     \
     <p style='text-align:left'> <b>Confidentiality and use of data.</b> All the information we collect during the course of the research will be processed \
     in accordance with Data Protection Law. In order to safeguard your privacy, we will never share personal information (like your name) with anyone \
-    outside the research team. Your data will be referred to by a unique participant number rather than by name). Please note that we will temporarily \
+    outside the research team. Your data will be referred to by a unique participant number rather than by name. Please note that we will temporarily \
     collect your Prolific ID to prevent repeat participation, however we will never share this information with anyone outside the research team and once \
     data collection is complete this ID will be deleted. Data will be stored on a password-protected, encrypted computer. The anonymised data collected \
     during this study will be used for research purposes. This includes being made available for other researchers to analyse.</p> \
     \
     <p style='text-align:left'> <b>What are my data protection rights? </b> The University of Edinburgh is a Data Controller for the information you provide. \
-    You have the right to access information held about you. Your right of access can be exercised in accordance Data Protection Law. You also have other \
+    You have the right to access information held about you. Your right of access can be exercised in accordance with Data Protection Law. You also have other \
     rights including rights of correction, erasure and objection. For more details, including the right to lodge a complaint with the Information \
     Commissioner's Office, please visit www.ico.org.uk. Questions, comments and requests about your personal data can also be sent to the University Data \
     Protection Officer at dpo@ed.ac.uk.</p> \
     \
     <p style='text-align:left'> <b>Voluntary participation and right to withdraw.</b> Your participation is voluntary, and you may stop at any time and for \
     any reason. If you wish to withdraw during the study, simply close the browser window and do not complete the study. If you wish to withdraw from the \
-    study after completing, you can email the researcher within 2 weeks of participating and we will delete your data. In this case, there no penalty or \
+    study after completing, you can email the researcher within 2 weeks of participating and we will delete your data. In this case, there is no penalty or \
     loss of benefits to which you are otherwise entitled. Please note that after the two weeks have passed we will no longer be able delete your anonymised \
     data because your Prolific ID will have been deleted.</p> \
     \
