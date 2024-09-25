@@ -4,10 +4,11 @@
 
 /*
 
-NOTE: This is the non-developer version (i.e. the actual experiment for Prolific), 
+NOTE ON VERSIONS:
+This is the live (non-developer) version (i.e. the actual experiment for Prolific), 
 which extracts Prolific IDs, runs the whole 30 test trials, and has none of the 
 console.logs in. Otherwise the two files (first-pilot-dev.js and first-pilot.js) 
-should be identical in terms of the actual code (but perhaps not comments, notes etc.).
+should be identical in terms of the actual code (but not comments, notes etc.).
 
 --- 
 
@@ -87,7 +88,8 @@ var images_to_preload = [];
 /******************************************************************************/
 
 /*
-This is the save_data function provided in Alisdair's tutorial, section 06.
+This is the save_data function provided in Alisdair's tutorial
+(https://softdev.ppls.ed.ac.uk/online_experiments/index.html), section 06.
 */
 
 function save_data(name, data_in) {
@@ -107,7 +109,7 @@ This code will save data from critical trials line by line.
 
 Note that experiment data is saved to a file named pragdep_ID.csv, where pragdep stands for 
 Pragmatics of dependent measures and ID is the randomly-generated participant ID or
-Prolific ID, depending on which version of exp is run (dev or non-dev).
+Prolific ID, depending on which version of exp is run (dev or live).
 
 Survey data (demographics and feedback) is saved in its own file, named pragdep_ID_survey.csv.
 */
@@ -182,8 +184,8 @@ function save_survey_line(data) {
 var participant_id = jsPsych.data.getURLVariable("PROLIFIC_PID");
 
 // record the participant ID in the jsPsych data so this can be access by the backup "save all data" 
-// code (lines 65-70) 
-// this adds a property called 'participant_id' to every trial
+// code (lines 64-69) 
+// this adds a data property called 'participant_id' to every trial
 jsPsych.data.addProperties({
     participant_id: participant_id,
   });
@@ -250,6 +252,10 @@ if (responseformat_assignment == "radio") {
         }
 }
 
+/******************************************************************************/
+/*** Create the stimuli list **************************************************/
+/******************************************************************************/
+
 // pretend the stim_list csv has been read in 
 test_csv_stims = [
     { 
@@ -298,7 +304,7 @@ var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "d
 - and either likelihood, acceptability or truth depending on condition assignment
 - in that trial, check the response on_finish
 - if correct response: give correct feedback -> move on to testing trials
-- if incorrect response: give incorrect feedback --> loop back to the same trial until they get it right
+- if incorrect response: give incorrect feedback --> loop back to the same trial until the correct answer is provided
 - 3 training trials in total. Stim and prompt are the same regardless of condition and response format
 */
 
@@ -563,7 +569,7 @@ NOTE: ADD LIST HERE to explain what the code does (short summary), or have this 
 */
 
 /*
-CURRENT METHOD (15 Apr): since we want 5 of each content type and 30 trials in total, we first make an array of the 6 content 
+CURRENT METHOD: since we want 5 of each content type and 30 trials in total, we first make an array of the 6 content 
 types and repeat 5 times with shuffling. Then we create the trial building function, then loop through the content types array 
 to input each of those content types in turn and thereby build the individual trials. Since the content types array is shuffled 
 when created, we don't need to randomise the order of the trials when the loop is finished, we can simply send that list 
