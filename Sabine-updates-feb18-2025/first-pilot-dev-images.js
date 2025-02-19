@@ -33,7 +33,7 @@ NOTE - tick, 27/8/24
 FIX - tick, 27/8/24
 REMOVE - tick, 27/8/24
 UNCOMMENT - tick, 27/8/24
-NEW - changes made by Sabine
+NEW-SABINE - changes made by Sabine
 
 */
 
@@ -123,7 +123,8 @@ Prolific ID, depending on which version of exp is run (dev or live).
 Survey data (demographics and feedback) is saved in its own file, named pragdep_ID_survey.csv.
 */
 function save_pragdep_data_line(data) {
-    // choose the data we want to save - this will also determine the order of the columns (so write_header should match this) NEW: need to add qud data to this
+    // choose the data we want to save - this will also determine the order of the columns (so write_header should match this) 
+    // NEW-SABINE: need to add qud data to this
     var data_to_save = [
         participant_id,
         data.condition,
@@ -231,15 +232,15 @@ if (responseformat_assignment == "radio") {
 }
 console.log("Condition:", condition_assignment);
 
-// NEW random assignment for QUD (Question Under Discussion)
+// NEW-SABINE random assignment for QUD (Question Under Discussion)
 var qud_assignment = jsPsych.randomization.sampleWithoutReplacement(["qud1", "qud2", "qud3", "qud4"], 1)[0];
 console.log("QUD:", qud_assignment);
 
 // Set the text and names for the response options and the instructions in a trial based on
-// response format, condition assignment (NEW: and qud assignment determined above) (to pass to trial building function).
+// response format, condition assignment (NEW-SABINE: and qud assignment determined above) (to pass to trial building function).
 // if the response format is radio, set these values for each of the conditions:
 // (note that likelihood is not included here as we are not doing binary likelihood trials) 
-// NEW: added conditionals for QUDs here - i.e. if qud_assignment is qud4, follow Vilde's setup, else use "How true is the response above" for instruction 
+// NEW-SABINE: added conditionals for QUDs here - i.e. if qud_assignment is qud4, follow Vilde's setup, else use "How true is the response above" for instruction 
 if (qud_assignment == "qud4") {    
     if (responseformat_assignment == "radio") { 
         if (condition_assignment == "truth") {
@@ -247,25 +248,30 @@ if (qud_assignment == "qud4") {
                 {name: "truth", text: "True"}, 
                 {name: "truth", text: "False"}
                 ];
-            instruction = "<p><em>For the highlighted card, is the description above true?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, is the description above true?</em></p>"; 
+            //NEW-SABINE: removed "following" and added "above"
             } else {
             response_options = [  
                 {name: "acceptability", text: "Acceptable"},
                 {name: "acceptability", text: "Unacceptable"}
                 ];
-            instruction = "<p><em>For the highlighted card, is the description above acceptable?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, is the description above acceptable?</em></p>"; 
+            //NEW-SABINE: removed "following" and added "above"
             }
     // or else, the response format is slider, and these values are chosen:
     } else { 
         if (condition_assignment == "truth") {
             response_options = ["Completely false", "Completely true"];
-            instruction = "<p><em>For the highlighted card, how true is the description above?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, how true is the description above?</em></p>"; 
+            //NEW-SABINE: removed "following" and added "above"
             } else if (condition_assignment == "acceptability") {
             response_options = ["Completely unacceptable", "Completely acceptable"];
-            instruction = "<p><em>For the highlighted card, how acceptable is the description above?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, how acceptable is the description above?</em></p>"; 
+            //NEW-SABINE: removed "following" and added "above"
             } else if (condition_assignment == "likelihood") {
             response_options = ["Completely impossible", "Completely certain"];
-            instruction = "<p><em>One card is picked at random. How likely is it that the description above is true?</em></p>"; //NEW: re-worded to accommodate new layout
+            instruction = "<p><em>One card is picked at random. How likely is it that the description above is true?</em></p>"; 
+            //NEW-SABINE: re-worded to accommodate new layout
             }
         }
 } else { //if the qud is qud1-3
@@ -275,13 +281,15 @@ if (qud_assignment == "qud4") {
                 {name: "truth", text: "True"}, 
                 {name: "truth", text: "False"}
                 ];
-            instruction = "<p><em>For the highlighted card, is the response above true?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, is the response above true?</em></p>"; 
+            //NEW-SABINE: removed "following" and added "above"
             } else {
             response_options = [  
                 {name: "acceptability", text: "Acceptable"},
                 {name: "acceptability", text: "Unacceptable"}
                 ];
-            instruction = "<p><em>For the highlighted card, is the response above acceptable?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, is the response above acceptable?</em></p>"; 
+            //NEW-SABINE: removed "following" and added "above"
             }
     // or else, the response format is slider, and these values are chosen:
     } else { 
@@ -304,7 +312,7 @@ console.log("Response options:", response_options);
 /******************************************************************************/
 
 // this simulates reading in a csv stim list, but is just storing all the relevant info needed later. 
-// NEW: added QUDs - could store this is an external file
+// NEW-SABINE: added QUDs - could store this in an external file
 var test_csv_stims = [
   { 
     content_type: "ana", 
@@ -538,7 +546,7 @@ console.log(target_content_types);
 /* Structure:
 - make a trial, which will either be slider or radio depending on response format assignment
 - and either likelihood, acceptability or truth depending on condition assignment
-- NEW: and either primary, secondary, all, or none QUD
+- NEW-SABINE: and either primary, secondary, all, or none QUD
 - in that trial, check the response on_finish
 - if correct response: give correct feedback --> move on to testing trials
 - if incorrect response: give incorrect feedback --> loop back to the same trial until the correct answer is provided
@@ -553,7 +561,7 @@ non-prob trials: two trials that are clearly appropriate/true and one that clear
 
 // function to build a likelihood training trial
 
-// NEW: this is based on the original function that builds 4-image trials - there are some bits in this that are now redundant because 
+// NEW-SABINE: this is based on the original function that builds 4-image trials - there are some bits in this that are now redundant because 
 // this function is only used when participants have been assigned to likelihood anyway, but I din't have time to take everything out because there are // some dependencies
 function make_likelihood_training_trial(prompt, target, filler_1, filler_2, filler_3){
     
@@ -573,7 +581,7 @@ function make_likelihood_training_trial(prompt, target, filler_1, filler_2, fill
     console.log(images.indexOf(target_filename)) // gets index of target image in the array of images
 
     // set the highlighted image index dependening on condition assignment 
-    // NEW: this can probably go because this function is only for likelihood trials anyway, but need to check dependencies 
+    // NEW-SABINE: this can probably go because this function is only for likelihood trials anyway, but need to check dependencies 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
     } else {
@@ -593,7 +601,7 @@ function make_likelihood_training_trial(prompt, target, filler_1, filler_2, fill
     } else if (responseformat_assignment == "slider") { 
         // note that we specify fairly generous ranges for what counts as correct in slider trials, although we'd expect 
         // very close to exact values for these (as listed)
-        // NEW: stuff to take out
+        // NEW-SABINE: stuff to take out
         if (target == "target-A") {
         correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
         } else if (target == "target-B") {
@@ -738,7 +746,7 @@ function make_likelihood_training_trial(prompt, target, filler_1, filler_2, fill
 
     // set the feedback that will be displayed when a participant chooses the correct response, 
     // to be used in the correct_feedback subtrial below
-    // NEW: stuff to take out
+    // NEW-SABINE: stuff to take out
     if (condition_assignment == "truth") { 
         if (responseformat_assignment == "radio") {
             if (target == "target-A") {
@@ -792,7 +800,7 @@ function make_likelihood_training_trial(prompt, target, filler_1, filler_2, fill
     var correct_feedback = { // works, but need some finetuning for how we store correct_answer for slider trials (see lines 175-185)
     type: jsPsychHtmlButtonResponse,
     stimulus: function () {
-        // NEW: took the if else logic out because this is always likelihood
+        // NEW-SABINE: took the if else logic out because this is always likelihood
         return prompt + "<p><b style=color:forestgreen>Correct! Here, if a card is picked at random </br>" + correct_response +
         // The answer is \"" + answer + "\".<p>" + 
         "<img src=" + images[0] + " style='border:3px solid lightgray; width:200px'>" + "&nbsp; &nbsp;" +
@@ -820,7 +828,7 @@ var likelihood_training_trials = [
 
 
 //**********************************************************************************************/
-// NEW: new function here for truth and acceptability trials with only one image being displayed
+// NEW-SABINE: new function here for truth and acceptability trials with only one image being displayed
 // this doesn't work yet - I have taken the original code and tried to adapt it to only show one image,
 // but the custom plugin needs 4 images to work, so I think we need a different plugin, or adapt
 // the one used for four images. the jspsych library has got a single-image plugin, but the buttons etc are
@@ -1049,7 +1057,7 @@ var  truth_acceptability_training_trials = [
   ];
 
 
-// NEW: if participants have been asssigned to likelihood condition, use likelihood training trial function, if assigned to truth or acceptability, use that, then store training trials in a variable to be run in the final timeline
+// NEW-SABINE: if participants have been asssigned to likelihood condition, use likelihood training trial function, if assigned to truth or acceptability, use that, then store training trials in a variable to be run in the final timeline
 var training_trials = [];
 
 if (condition_assignment === "likelihood") {
@@ -1090,7 +1098,7 @@ more images per content type + prompt combination later.
 // every time the function is called below, i.e. every time the loop loops. Then when saving each trial it will take the trial
 // number from this variable
 
-//NEW: I have not implemented anything here to change the number of images
+//NEW-SABINE: I have not implemented anything here to change the number of images
 
 var test_trial_counter = 0; // start from 0, because the loop will add 1 from the first time it's called so this means the first 
 // trial will end up with count 1
@@ -1181,7 +1189,7 @@ function make_test_trial(target_content_type) {
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
     // NOTE It seems that type can be dynamic now, so can change this to be dynamic in the way it's done for the training trials if we want
     // to. Keeping as is for now as that really is only cosmetic and the code works as is.
-    if (qud_assignment == "qud4") { //NEW: if qud4 is assigned, the "question" and "response" bits are not inserted
+    if (qud_assignment == "qud4") { //NEW-SABINE: if qud4 is assigned, the "question" and "response" bits are not inserted
         if (responseformat_assignment== "radio") {
             // make trials using custom radio button plugin
             var trial = {
@@ -1196,7 +1204,7 @@ function make_test_trial(target_content_type) {
                 on_start: function (trial) {
                     trial.data = {
                         condition: condition_assignment,
-                        qud: qud_assignment, //NEW: could also make this "qud" if we want to record the actual question rather than qud1, qud2 etc
+                        qud: qud_assignment, //NEW-SABINE: could also make this "qud" if we want to record the actual question rather than qud1, qud2 etc
                         response_format: "radio",
                         block: "test",
                         training_trial_counter: "na",
@@ -1254,7 +1262,7 @@ function make_test_trial(target_content_type) {
             return slider_trial;
         } 
         
-    } else { //NEW: if qud1-3 is assigned, the "question" and "response" bits are inserted
+    } else { //NEW-SABINE: if qud1-3 is assigned, the "question" and "response" bits are inserted
         if (responseformat_assignment== "radio") {
             // make trials using custom radio button plugin
             var trial = {
@@ -1269,7 +1277,7 @@ function make_test_trial(target_content_type) {
                 on_start: function (trial) {
                     trial.data = {
                         condition: condition_assignment,
-                        qud: qud_assignment, //NEW: could also make this "qud" if we want to record the actual question rather than qud1, qud2 etc
+                        qud: qud_assignment, //NEW-SABINE: could also make this "qud" if we want to record the actual question rather than qud1, qud2 etc
                         response_format: "radio",
                         block: "test",
                         training_trial_counter: "na",
