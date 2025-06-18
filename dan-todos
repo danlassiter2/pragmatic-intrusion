@@ -1,0 +1,23 @@
+todos
+
+change btw condition randomization - to get optimal spread - lines 200ff
+    how many per condition for binary, slider?
+
+binary lhood? for parity
+
+l261ff - we are only using 6 stims for the pilot? if so need to expand
+    yes - changes will interact with make_test_trial(), see lines 565ff
+
+349ff - reduce ranges in training trials
+
+change to preload all images
+    i.e. just list all images in 'images_to_preload'
+
+add QUD manipulation
+    by participant: yes or no (target 25% no in order to get similar data quantity for each condition)
+    within: first, second, or both-targeting
+
+record QUD manipulation in by-trial data
+  if global QUD = none, then make every trial's data 'none'
+
+add QUDs to training for relevant participants??

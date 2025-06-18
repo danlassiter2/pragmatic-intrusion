@@ -1,0 +1,17 @@
+content_type;prompt;prompt_name;qud;qud_type;content_status;scenes;
+arc;The circle, which is blue, is right of the triangle;arc-1;;;tt;arc-1-tt-1,arc-1-tt-2,arc-1-tt-3;
+arc;The circle, which is blue, is right of the triangle;arc-1;;;tf;arc-1-tf-1,arc-1-tf-2,arc-1-tf-3;
+arc;The circle, which is blue, is right of the triangle;arc-1;;;ft;arc-1-ft-1,arc-1-ft-2,arc-1-ft-3;
+arc;The circle, which is blue, is right of the triangle;arc-1;;;ff;arc-1-ff-1,arc-1-ff-2,arc-1-ff-3;
+arc;The square, which is orange, is left of the circle;arc-2;;;tt;arc-2-tt-1,arc-2-tt-2,arc-2-tt-3;
+arc;The square, which is orange, is left of the circle;arc-2;;;tf;arc-2-tf-1,arc-2-tf-2,arc-2-tf-3;
+arc;The square, which is orange, is left of the circle;arc-2;;;ft;arc-2-ft-1,arc-2-ft-2,arc-2-ft-3;
+arc;The square, which is orange, is left of the circle;arc-2;;;ff;arc-2-ff-1,arc-2-ff-2,arc-2-ff-3;
+arc;The triangle, which is left of the square, is yellow;arc-3;;;tt;arc-3-tt-1,arc-3-tt-2,arc-3-tt-3;
+arc;The triangle, which is left of the square, is yellow;arc-3;;;tf;arc-3-tf-1,arc-3-tf-2,arc-3-tf-3;
+arc;The triangle, which is left of the square, is yellow;arc-3;;;ft;arc-3-ft-1,arc-3-ft-2,arc-3-ft-3;
+arc;The triangle, which is left of the square, is yellow;arc-3;;;ff;arc-3-ff-1,arc-3-ff-2,arc-3-ff-3;
+;;arc-x;;;ty;sz;arc-x-ty-sz
+;;x=ceil(0,n);;;;z=ceil(0,3);"""arc-""+str(x)+""-""+randcs+""-""+str(z)"
+;;javascript random number 1 to n;;;;;javascript concatenate string
+;;;;;;;javascript convert number to string
