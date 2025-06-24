@@ -282,7 +282,7 @@ if (qud_global == "no") {
 // create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
 // the test trials will be built and thereby presented (i.e. the randomisation of trial order happens already here)
 // This way can easily adjust number of total trials up or down (and keep an equal number of each content type)
-var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 2); // only do 1 or 2 while testing, 5 for proper exp
+var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only","scalar"], 5); 
 //console.log(target_content_types);
 
 /******************************************************************************/
@@ -650,9 +650,9 @@ function make_test_trial(target_content_type) {
     //
     // DEV ONLY - REPLCE WITH ABOVE ONCE STIMS READY
     //
-    var target_prompt_name = target_stim.prompt_name.concat(1);
+    var target_prompt_name = target_stim.prompt_name + 1;
     //
-    //console.log(target_prompt_name);
+    console.log(target_prompt_name);
 
     // NOTE: since there are two possible (uniquely named) scenes that can satisfy a given truth value and prompt combination, the image filename is set to randomly pick a number 1-2 for the scene index and include that in the filename
         // 1+(Math.floor(Math.random() * 2));

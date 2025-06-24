@@ -26,15 +26,6 @@ var stims = [
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
-    { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con4",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
   { 
     content_type: "ana", 
     prompt: "The triangle is pink too.",
@@ -63,15 +54,6 @@ var stims = [
     qud4: ""
   },
   { 
-    content_type: "ana", 
-    prompt: "The triangle is pink too.",
-    prompt_name: "ana4",
-    qud1: "What colour is the triangle?", 
-    qud2: "Besides the triangle, is any other shape pink?", 
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
     content_type: "only", 
     prompt: "Only the square is green.",
     prompt_name: "only1",
@@ -93,15 +75,6 @@ var stims = [
     content_type: "only", 
     prompt: "Only the square is green.",
     prompt_name: "only3",
-    qud1: "What colour is the square?",  
-    qud2: "Besides the square, is any other shape green?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-   { 
-    content_type: "only", 
-    prompt: "Only the square is green.",
-    prompt_name: "only4",
     qud1: "What colour is the square?",  
     qud2: "Besides the square, is any other shape green?",
     qud3: "What can you tell me about the shapes?", 
@@ -135,20 +108,11 @@ var stims = [
     qud4: ""
   },
   { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc4",
-    qud1: "Where is the circle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
     content_type: "def_ex", 
     prompt: "The blue circle is next to the triangle.",
     prompt_name: "def_ex1",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
+    qud1: "Where is the circle?", 
+    qud2: "Is there a blue circle?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -156,9 +120,9 @@ var stims = [
     content_type: "def_ex", 
     prompt: "The blue circle is next to the triangle.",
     prompt_name: "def_ex2",
-    qud1: "Where is the circle in relation to the triangle?", 
+    qud1: "Where is the circle?", 
     qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
+    qud3: "Is there a blue circle?", 
     qud4: ""
   },
   { 
@@ -167,24 +131,15 @@ var stims = [
     prompt_name: "def_ex3",
     qud1: "Where is the circle in relation to the triangle?", 
     qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex4",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
+    qud3: "Is there a blue circle?", 
     qud4: ""
   },
   { 
     content_type: "def_un", 
     prompt: "The circle is left of the triangle.",
     prompt_name: "def_un1",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
+    qud1: "Where is the circle?", 
+    qud2: "Is there more than one circle?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -192,8 +147,8 @@ var stims = [
     content_type: "def_un", 
     prompt: "The circle is left of the triangle.",
     prompt_name: "def_un2",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
+    qud1: "Where is the circle?", 
+    qud2: "Is there more than one circle?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -201,17 +156,35 @@ var stims = [
     content_type: "def_un", 
     prompt: "The circle is left of the triangle.",
     prompt_name: "def_un3",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
+    qud1: "Where is the circle?", 
+    qud2: "Is there more than one circle?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
-    content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un4",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
+    content_type: "scalar", 
+    prompt: "Some of the circles are green.",
+    prompt_name: "scalar1",
+    qud1: "Are any of the circles green?", 
+    qud2: "Are all of the circles green?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+    { 
+    content_type: "scalar", 
+    prompt: "Some of the shapes are blue.",
+    prompt_name: "scalar2",
+    qud1: "Are any of the shapes blue?", 
+    qud2: "Are all of the shapes blue?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+    { 
+    content_type: "scalar", 
+    prompt: "Some of the shapes are squares.",
+    prompt_name: "scalar3",
+    qud1: "Are any of the shapes squares?", 
+    qud2: "Are all of the shapes squares?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   }
