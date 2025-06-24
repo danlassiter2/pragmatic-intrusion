@@ -3,30 +3,6 @@
 /******************************************************************************/
 
 /*
-Sabine note: 
-changes made in this version: 
-Participants are now being randomly assigned to QUD condition, 
-depending on it being qud4 or qud1-3, the italicised text (e.g. For the highlighted card, how acceptable is the response above?) changes, 
-for qud1-3, the qud and prompt are fronted by "question" and response"
-the qud they have been assigned to is saved
-
-NOTE ON VERSIONS:
-This is the developer version, which creates a random participant ID (but has 
-the code in for extracting Prolific IDs, just commented out), only runs 12 
-test trials, and has all the console.logs in. Otherwise the two files 
-(first-pilot-dev.js and first-pilot.js) should be identical in terms of the 
-actual code (but not all comments and notes etc. are in the live version).
-
---- 
-
-For pilot, as it is fairly manual with current approach, we are doing only 
-one prompt per content type and two scenes (i.e. images) for now.
-
-This version defines the stims in the experiment code. Future versions may want to 
-read from csv instead. If so, this section here might want to contain info about this, 
-e.g. mention what the structure of the csv is and what the structure of the 
-read-in data is (i.e. when imported), following OELS (Online Experiments for Language 
-Scientists module) practice.
 
 CODE WORDS to search through for to check if anything needs updating/fixing/checking:
 UPDATE - tick, 27/8/24
@@ -85,23 +61,9 @@ var jsPsych = initJsPsych({
 
 var images_to_preload = [];
 
-// NOTE: could ADD in the testing stims here already, as they will be shown to 
-// every ppt so guaranteed they'll need to be preloaded. Not done here but could 
-// be a way of tidying up the code at some later point.
-
-// NOTE: currently doing preloading as is done in conferedate_priming.js (see 
-// https://kennysmithed.github.io/oels2023/oels_practical_wk9.html), but if we 
-// change to load stims from csv, this needs editing; see 
-// conferedate_priming_readfromcsv.js for how it was done there 
-
 /******************************************************************************/
 /*** Saving experiment data trial by trial ************************************/
 /******************************************************************************/
-
-/*
-This is the save_data function provided in Alisdair Tullo's tutorial 
-(https://softdev.ppls.ed.ac.uk/online_experiments/index.html), section 06.
-*/
 
 function save_data(name, data_in) {
     var url = "save_data.php";
@@ -139,6 +101,7 @@ function save_pragdep_data_line(data) {
         data.target_content_type,
         data.linguistic_prompt,
         data.target_image,
+        data.qud,
         ...data.images_in_order, // saves all images in the presented order (0-3). The ... is called spread, is applied within another 
         // array to make them into elements in the top level array (instead of a nested array). Ex: [...[1,2],3]=[1,2,3]. Avoids issue
         // with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (and we want this array 
@@ -203,13 +166,15 @@ jsPsych.data.addProperties({
   });
 
 /******************************************************************************/
-/*** Condition assignment (between ppts) **************************************/
+/*** Condition assignment (between participants) **************************************/
 /******************************************************************************/
 
 // randomly select response format (radio buttons or slider) at start of experiment
+// because there are two binary and 3 slider options below, to get equal-ish amounts of data
+// the choice is biased toward slider (60/40) 
 var responseformat_assignment = jsPsych.randomization.sampleWithoutReplacement(
-    ["radio", "slider"], 1)[0];
-console.log(responseformat_assignment);
+    ["radio", "radio", "slider", "slider", "slider"], 1)[0];
+//console.log(responseformat_assignment);
 
 /*// store response format as a variable to use dynamically in the trial building function
 if (responseformat_assignment == "radio") {
@@ -232,19 +197,21 @@ if (responseformat_assignment == "radio") {
     // and again, when response format is slider, set plugin to be slider plugin
     var plugin_type = jsPsychImageArraySliderResponse;
 }
-console.log("Condition:", condition_assignment);
+//console.log("Condition:", condition_assignment);
 
-// NEW random assignment for QUD (Question Under Discussion)
-var qud_assignment = jsPsych.randomization.sampleWithoutReplacement(["qud1", "qud2", "qud3", "qud4"], 1)[0];
-console.log("QUD:", qud_assignment);
+// Random assignment for QUD (Question Under Discussion)
+//      75% of participants will see randomly selected QUDs by trial
+//      25% will see no QUDs anywhere
+var qud_global = jsPsych.randomization.sampleWithoutReplacement(["yes", "yes", "yes", "no"], 1)[0];
+//console.log("QUD:", qud_global);
 
 // Set the text and names for the response options and the instructions in a trial based on
 // response format, condition assignment 
 // (NEW: and qud assignment determined above) (to pass to trial building function).
 // if the response format is radio, set these values for each of the conditions:
 // (note that likelihood is not included here as we are not doing binary likelihood trials) 
-// NEW: added conditionals for QUDs here - i.e. if qud_assignment is qud4, follow Vilde's setup, else use "How true is the response above" for instruction 
-if (qud_assignment == "qud4") {    
+// NEW: added conditionals for QUDs here - i.e. if qud_global is 'no', follow Vilde's setup, else use "How true is the response above" for instruction 
+if (qud_global == "no") {    
     if (responseformat_assignment == "radio") { 
         if (condition_assignment == "truth") {
             response_options = [  
@@ -272,7 +239,7 @@ if (qud_assignment == "qud4") {
             instruction = "<p><em>One card is picked at random. How likely is it that the description above is true?</em></p>"; //NEW: re-worded to accommodate new layout
             }
         }
-} else { //if the qud is qud1-3
+} else { //if this participant will see QUDs
     if (responseformat_assignment == "radio") { 
         if (condition_assignment == "truth") {
             response_options = [  
@@ -301,7 +268,7 @@ if (qud_assignment == "qud4") {
         }
     }
 }
-console.log("Response options:", response_options);
+//console.log("Response options:", response_options);
 
 /******************************************************************************/
 /*** Create the stimuli list **************************************************/
@@ -309,231 +276,14 @@ console.log("Response options:", response_options);
 
 // this simulates reading in a csv stim list, but is just storing all the relevant info needed later. 
 // NEW: added QUDs
-var test_csv_stims = [
-  { 
-    content_type: "ana", 
-    prompt: "The triangle is pink too.",
-    prompt_name: "ana",
-    qud1: "What colour is the triangle?", 
-    qud2: "Are there shapes other than the triangle that are pink?", 
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle? [Where is the square?]",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "ana", 
-    prompt: "The triangle is pink too.",
-    prompt_name: "ana",
-    qud1: "What colour is the triangle?", 
-    qud2: "Are there shapes other than the triangle that are pink?", 
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "only", 
-    prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "What colour is the square?", 
-    qud2: "Are there shapes other than the square that are green?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "ana", 
-    prompt: "The triangle is pink too.",
-    prompt_name: "ana",
-    qud1: "What colour is the triangle?", 
-    qud2: "Are there shapes other than the triangle that are pink?", 
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "only", 
-    prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "(not sure about this one - is there a square? or what colour is the square?)", 
-    qud2: "Are there shapes other than the square that are green?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "ana", 
-    prompt: "The triangle is pink too.",
-    prompt_name: "ana",
-    qud1: "(not sure about this one - is there a triangle? or what colour is the triangle?)", 
-    qud2: "Are there shapes other than the triangle that are pink?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "only", 
-    prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "Are there shapes other than the square that are green?", 
-    qud2: "What colour is the square?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "only", 
-    prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "Are there shapes other than the square that are green?", 
-    qud2: "What colour is the square?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  }
-];
+
 
 
 // create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
 // the test trials will be built and thereby presented (i.e. the randomisation of trial order happens already here)
 // This way can easily adjust number of total trials up or down (and keep an equal number of each content type)
 var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only"], 2); // only do 1 or 2 while testing, 5 for proper exp
-console.log(target_content_types);
+//console.log(target_content_types);
 
 /******************************************************************************/
 /*** Creating training trials *************************************************/
@@ -560,19 +310,19 @@ non-prob trials: two trials that are clearly appropriate/true and one that clear
 function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     
     // build image file paths
-    var target_filename = "pilot_scenes/training_stims/" + target + ".jpg"; 
-    var filler_1_filename = "pilot_scenes/training_stims/" + filler_1 + ".jpg";
-    var filler_2_filename = "pilot_scenes/training_stims/" + filler_2 + ".jpg";
-    var filler_3_filename = "pilot_scenes/training_stims/" + filler_3 + ".jpg";
+    var target_filename = "stimuli/training_stims/" + target + ".jpg"; 
+    var filler_1_filename = "stimuli/training_stims/" + filler_1 + ".jpg";
+    var filler_2_filename = "stimuli/training_stims/" + filler_2 + ".jpg";
+    var filler_3_filename = "stimuli/training_stims/" + filler_3 + ".jpg";
     // NOTE Probably a neater way to do this, at least for filler images! But this works.
 
     // put all the images together 
     var images_unshuffled = [].concat(target_filename, filler_1_filename, filler_2_filename, filler_3_filename); 
-    console.log(images_unshuffled)
+    //console.log(images_unshuffled)
     images_to_preload.push(...images_unshuffled); // using spread to avoid preload list having a nested array; seems to work
     var images = jsPsych.randomization.shuffle(images_unshuffled);
-    console.log(images)
-    console.log(images.indexOf(target_filename)) // gets index of target image in the array of images
+    //console.log(images)
+    //console.log(images.indexOf(target_filename)) // gets index of target image in the array of images
 
     // set the highlighted image index dependening on condition assignment 
     if (condition_assignment == "likelihood") {
@@ -595,23 +345,24 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         // note that we specify fairly generous ranges for what counts as correct in slider trials, although we'd expect 
         // very close to exact values for these (as listed)
         if (target == "target-A") {
-        correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
+        correct_answer = [85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
         } else if (target == "target-B") {
             if (condition_assignment == "truth") {
-                correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely true    
+                correct_answer = [85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely true    
             } else if (condition_assignment == "acceptability") {
-                correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely acceptable
+                correct_answer = [85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely acceptable
             } else if (condition_assignment == "likelihood") {
             correct_answer = [40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60];} // expect 50 or close to
         } else if (target == "target-C") {
-            correct_answer = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]; // expect 0 or close to 
+            correct_answer = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; // expect 0 or close to 
         }
         // NOTE This is not an elegant solution for specifying the range, but only reasonable alternative I found was to create
         // a function to define a range which ends up being more lines of code anyway so for now keeping as this (although higher
         // risk of typos with this method so may want to change!)
     };
-    console.log(correct_answer);
-    var correct_answer = correct_answer; // seems I have to store this for the trial variable below to be able to access it. 
+    //console.log(correct_answer);
+    var correct_answer = correct_answer; 
+    // seems I have to store this for the trial variable below to be able to access it. 
     // Can't tell why, as e.g. "index" seems to be accesible even when it's not stored in a variable..!
 
     // Counter variable for storing how often a training trial was retaken; it will start from 1 every time the training trial building
@@ -643,7 +394,8 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
                 // every time the incorrect_feedback is shown, i.e. every time the participant is prompted to try again
                 test_trial_counter: "na", 
                 target_truth_value: "na", 
-                target_content_type: "na", 
+                target_content_type: "na",
+                qud: "na", 
                 linguistic_prompt: prompt, 
                 target_image: target_filename,
                 images_in_order: images, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
@@ -658,18 +410,18 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             // NOTE: === is identity (i.e. will check for match and type), == is only looking for equality (so will check for match 
             // but not in type; e.g. the following will all return true: 1 == '1', 1 == 1, 1 == true)
             else {data.correct = false}
-            console.log(correct_answer); // this is where the issue lies! But don't know why.. UPDATE: stored the variable and now
+            //console.log(correct_answer); // this is where the issue lies! But don't know why.. UPDATE: stored the variable and now
             // it works. Guess it wasn't accessible in the same way the others were, though don't know why! E.g. index works fine
             // without being stored as a variable...
-            console.log(data.response); // ISSUE is that response is stored as e.g. "truth", i.e. the same as condition. CHECK if that
+            //console.log(data.response); // ISSUE is that response is stored as e.g. "truth", i.e. the same as condition. CHECK if that
             // is also what happens in the main exp! UPDATE Have fixed that, now it stores the actual text of the button (note; is
             // case-sensitive!)
-            console.log(data.correct); // evalutes correctly! 
+            //console.log(data.correct); // evalutes correctly! 
             save_pragdep_data_line(data); //save the trial data 
         },
     };
-        console.log(training_trial);
-        console.log(response_options);
+        //console.log(training_trial);
+        //console.log(response_options);
 
     // a subtrial that appears if the participant chooses the wrong response
     var incorrect_feedback = {
@@ -691,6 +443,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
                 test_trial_counter: "na",
                 target_truth_value: "na", 
                 target_content_type: "na", 
+                qud: "na",
                 linguistic_prompt: prompt, 
                 target_image: target_filename,
                 images_in_order: images, 
@@ -701,11 +454,11 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             //if(data.response === correct_answer){data.correct = true} // old way of checking when only one element in correct_answer
             if(correct_answer.includes(data.response)){data.correct = true}  
             else {data.correct = false}
-            console.log(correct_answer); 
-            console.log(data.response); 
-            console.log(data.correct);
+            //console.log(correct_answer); 
+            //console.log(data.response); 
+            //console.log(data.correct);
             save_pragdep_data_line(data); //save the trial data 
-            console.log(images);
+            //console.log(images);
         },
     };
 
@@ -714,7 +467,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         timeline: [incorrect_feedback],
         conditional_function: function () {
             var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct // gets what data.correct was stored as 
-            console.log(last_trial_correct);
+            //console.log(last_trial_correct);
             if(last_trial_correct == false) { // if response in most recent trial was stored as false, i.e. incorrect, then
                 return true; // means we *will* run the incorrect_feedback timeline
             } else {
@@ -777,14 +530,14 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     // or else, the condition assignment is likelihood (which is always slider), meaning this is the feedback:
     } else if (condition_assignment == "likelihood") {
         if (target == "target-A") {
-            correct_response = "the sentence is completely true.</p>";
+            correct_response = "it's certain that the sentence is true.</p>";
         } else if (target == "target-B") {
             correct_response = "there is an even chance that the sentence is true.</p>";
         } else if (target == "target-C") {
-            correct_response = "the sentence is completely false.</p>";
+            correct_response = "the sentence couldn't possibly be true.</p>";
         }
     }
-    console.log(correct_response);
+    //console.log(correct_response);
     var correct_response = correct_response; // again, seems like it needed to be stored in a variable to be properly accessible
 
     // a subtrial that appears if the participant chooses the correct response
@@ -860,26 +613,29 @@ var test_trial_counter = 0; // start from 0, because the loop will add 1 from th
 
 // function to create the trials
 function make_test_trial(target_content_type) {
+    var qud_assignment;
+    if (qud_global == 'no') { // then this participant won't see any QUDs
+        qud_assignment = 'qud4';
+    } else { // else choose a target at random by trial
+        qud_assignment = jsPsych.randomization.sampleWithReplacement(['qud1','qud2','qud3'], 1)[0];
+    }
+
     // make array with all possible truth value combinations
     var truth_values = ["tt","tf","ft","ff"];
     // randomly select one of them to be the target truth value in a trial
-    var target_truth_value = 
-    jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
-    console.log(target_truth_value); 
+    var target_truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
+    //console.log(target_truth_value); 
 
-    // set trial stims to be determined by what is input as the target content type when trial building function
-    // is called below 
+    // set trial stims to be determined by what is input as the target content type when trial building function is called below 
     // so this returns everything in the stim list (the pretend csv) that matches the current target content type
-    var trial_stims_pool = test_csv_stims.filter(function(row) {return row.content_type == target_content_type;});
-    console.log(trial_stims_pool);
+    var trial_stims_pool = stims.filter(function(row) {return row.content_type == target_content_type;});
+    //console.log(trial_stims_pool);
     
-    // out of this pool of stims that all have the target content type for that trial, randomly choose 4 with 
-    // replacement to populate the trial
-    // NOTE At current (12 June), there are 8 images associated with each prompt (note: prompt is identical to content
-    // type at current, since there is only one prompt for each content type - but this may change if adding more prompts):
+    // out of this pool of stims that all have the target content type for that trial, randomly choose 4 with replacement to populate the trial
+    // NOTE At current (12 June), there are 8 images associated with each prompt (note: prompt is identical to content type at current, since there is only one prompt for each content type - but this may change if adding more prompts):
     // 2 images * 4 possible truth status combinations
     var trial_stims = jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
-    console.log(trial_stims);
+    //console.log(trial_stims);
     
     // of these, pick first element to be the target (relevant for non-probability trials, makes no difference for rest)
     var target_stim = trial_stims[0]; 
@@ -888,20 +644,28 @@ function make_test_trial(target_content_type) {
     var qud = target_stim[qud_assignment]; 
 
     // build target scene/image filename
-    var target_prompt_name = target_stim.prompt_name;
-    // NOTE: could probably remove this variable assignment and directly input target_stim.prompt_name where needed, 
-    // if wanting to make the code tidier. But current setup works.
-    console.log(target_prompt_name);
+    // choose randomly between items 1-4 for that content type
+    //var target_prompt_name = target_stim.prompt_name.concat(jsPsych.randomization.sampleWithReplacement([1,2,3,4], 1)[0]);
 
-    // NOTE: since there are two possible (uniquely named) scenes that can satisfy a 
-    // given truth value and prompt combination, the image filename is set to
-    // randomly pick a number 1-2 for the scene index and include that in the filename
-    // 1+(Math.floor(Math.random() * 2));
-    // Explanation: start with 1, add generated random number between 0 (inclusive) and 1 (exclusive), 
-    // multiply by 2, round up to whole number
-    var target_image_filename = "pilot_scenes/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpg");
-    console.log(target_image_filename);
-    // NOTE target_prompt_name could just be target_stim.prompt_name, if no need to store in a variable (see above)
+    //
+    // DEV ONLY - REPLCE WITH ABOVE ONCE STIMS READY
+    //
+    var target_prompt_name = target_stim.prompt_name.concat(1);
+    //
+    //console.log(target_prompt_name);
+
+    // NOTE: since there are two possible (uniquely named) scenes that can satisfy a given truth value and prompt combination, the image filename is set to randomly pick a number 1-2 for the scene index and include that in the filename
+        // 1+(Math.floor(Math.random() * 2));
+    // Explanation: start with 1, add generated random number between 0 (inclusive) and 1 (exclusive), multiply by 2, round up to whole number
+
+    //var target_image_filename = "stimuli/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpg");
+    //console.log(target_image_filename);
+
+    var imgNum = jsPsych.randomization.sampleWithReplacement([1,2], 1)[0];
+
+    var target_image_filename = "stimuli/".concat(target_prompt_name,"-",target_truth_value,"-",imgNum,".jpg");
+    //console.log(target_image_filename);
+
 
     // add filename to the list of images to preload
     images_to_preload.push(target_image_filename);
@@ -910,7 +674,7 @@ function make_test_trial(target_content_type) {
     var filler_image_filenames = []
     for (var i=1; i<4; i++) { 
         filler_stim = trial_stims[i];
-        filler_image_filename = "pilot_scenes/".concat(
+        filler_image_filename = "stimuli/".concat(
             filler_stim.prompt_name,
             "-",
             jsPsych.randomization.sampleWithoutReplacement(truth_values, 1), // randomly samples truth value 
@@ -924,15 +688,15 @@ function make_test_trial(target_content_type) {
         // also add to list of images to preload
         images_to_preload.push(filler_image_filename);
     }
-    console.log(filler_image_filenames)
+    //console.log(filler_image_filenames)
 
     // put all the scenes together 
     var selected_scenes_unshuffled = [].concat(target_image_filename, filler_image_filenames);
-    console.log(selected_scenes_unshuffled)
+    //console.log(selected_scenes_unshuffled)
     // shuffle the selected scenes before passing to the trial plugin 
     var selected_scenes = jsPsych.randomization.shuffle(selected_scenes_unshuffled);
-    console.log(selected_scenes)
-    console.log(selected_scenes.indexOf(target_image_filename)) // gets index of target image in the array of selected scenes
+    //console.log(selected_scenes)
+    //console.log(selected_scenes.indexOf(target_image_filename)) // gets index of target image in the array of selected scenes
 
     // set the highlighted image index and preamble depending on condition assignment 
     if (condition_assignment == "likelihood") {
@@ -1013,7 +777,7 @@ function make_test_trial(target_content_type) {
                     save_pragdep_data_line(data); //save the trial data
                 },
             };
-            console.log(slider_trial);
+            //console.log(slider_trial);
             return slider_trial;
         } 
         
@@ -1086,7 +850,7 @@ function make_test_trial(target_content_type) {
                     save_pragdep_data_line(data); //save the trial data
                 },
             };
-            console.log(slider_trial);
+            //console.log(slider_trial);
             return slider_trial;
         }
     }
@@ -1101,8 +865,8 @@ for (target_content_type of target_content_types) {
     single_trial = make_test_trial(target_content_type);
     test_trials.push(single_trial);
 }
-console.log(test_trials);
-console.log(test_trial_counter);
+//console.log(test_trials);
+//console.log(test_trial_counter);
 
 // just for having a reference point to check all trials are being shown as expected - REMOVE from non-dev version
 /*var next_trial = {
@@ -1115,7 +879,7 @@ console.log(test_trial_counter);
 /*** Preload ******************************************************************/
 /******************************************************************************/
 
-console.log(images_to_preload);
+//console.log(images_to_preload);
 
 var preload = {
     type: jsPsychPreload,
@@ -1124,7 +888,7 @@ var preload = {
     error_message: "The experiment failed to load. Please refresh the page."
 };
 
-console.log(preload);
+//console.log(preload);
 
 /******************************************************************************/
 /*** Write headers for experiment data file ****************************************/
@@ -1148,6 +912,7 @@ var write_headers = {
         \"target_content_type\",\
         \"linguistic_prompt\",\
         \"target_image\",\
+        \"qud\",\
         \"images_in_presentation_order_0\",\
         \"images_in_presentation_order_1\",\
         \"images_in_presentation_order_2\",\
@@ -1190,7 +955,7 @@ var consent_screen = {
         "<h3>Information and consent</h3> \
     <p style='text-align:left'> <b>Study title:</b> Sentences and shapes <br> \
     <b>Principal investigator:</b> Dan Lassiter <br> \
-    <b>Researcher collecting data:</b> Vilde Reksnes</p> \
+    <b>Researcher collecting data:</b> Dan Lassiter</p> \
     \
     <p style='text-align:left'> <b>What is this document?</b> This document explains what kind of study we're doing, what your rights are, \
     and what will be done with your data. You should print this page for your records.</p> \
@@ -1225,7 +990,7 @@ var consent_screen = {
     data because your Prolific ID will have been deleted.</p> \
     \
     <p style='text-align:left'> If you have any questions about what you've just read, please feel free to contact us now or later. You can contact us by \
-    email at vilde.reksnes@ed.ac.uk. This project has been approved by PPLS Ethics committee. If you have questions or comments regarding your rights as a \
+    email at dan.lassiter@ed.ac.uk. This project has been approved by PPLS Ethics committee. If you have questions or comments regarding your rights as a \
     participant, please contact the School Research Convenor at ppls.rec@ed.ac.uk.</p> \
     \
     <p style='text-align:left'> By proceeding you consent to the following:</p> \
@@ -1291,22 +1056,6 @@ var final_screen = {
 /*** Demographics and feedback ************************************************/
 /******************************************************************************/
 
-// old way of doing feedback, changed to doing everything in one plugin as that was easier for saving to the same csv
-/*var feedback = {
-    type: jsPsychSurveyText,
-    preamble: "<h3>Feedback</h3>", //"<p style='text-align:left'> <b>Feedback</b></p>",
-    questions: [
-      {prompt: 'Do you have any comments about this experiment?', rows: 5, name: 'feedback'}
-    ],
-    on_finish: function (data) {
-        console.log(data); //let me see the data in the console
-        /*,
-    on_finish: function (data) {
-        save_survey_line(data); //save the feedback data in survey csv
-    },
-  }
-}*/
-
 var demographics_and_feedback = {
     type: jsPsychSurveyHtmlForm,
     preamble:
@@ -1331,28 +1080,24 @@ var demographics_and_feedback = {
                 <p style='text-align:left'>Do you have any comments about this experiment?<br> \
                 <input name='feedback' type='text'></p>",
     on_finish: function (data) {
-        console.log(data); //let me see the data in the console
+        //console.log(data); //let me see the data in the console
         save_survey_line(data); //save the survey data
     },
   };
-
-// might want to add a check of if "Yes" to bilingual, and then set final question to be required. Currently does not require a response.
 
 /******************************************************************************/
 /*** Build the full timeline **************************************************/
 /******************************************************************************/
 
 var full_timeline = [].concat(
-    //consent_screen,
-    //instructions,
+    consent_screen,
+    instructions,
     write_headers,
     write_survey_headers,
     preload,
-    //training_trials,
+    training_trials,
     exp_start, 
     test_trials,
-    //next_trial,
-    //feedback,
     demographics_and_feedback,
     final_screen
 );

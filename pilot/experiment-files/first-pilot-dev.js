@@ -361,12 +361,12 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         // note that we specify fairly generous ranges for what counts as correct in slider trials, although we'd expect 
         // very close to exact values for these (as listed)
         if (target == "target-A") {
-        correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
+        correct_answer = [80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
         } else if (target == "target-B") {
             if (condition_assignment == "truth") {
-                correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely true    
+                correct_answer = [80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely true    
             } else if (condition_assignment == "acceptability") {
-                correct_answer = [80,81,82.83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely acceptable
+                correct_answer = [80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // completely acceptable
             } else if (condition_assignment == "likelihood") {
             correct_answer = [40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60];} // expect 50 or close to
         } else if (target == "target-C") {

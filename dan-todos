@@ -1,23 +1,28 @@
-todos
-
-change btw condition randomization - to get optimal spread - lines 200ff
-    how many per condition for binary, slider?
-
-binary lhood? for parity
-
-l261ff - we are only using 6 stims for the pilot? if so need to expand
-    yes - changes will interact with make_test_trial(), see lines 565ff
-
-349ff - reduce ranges in training trials
-
-change to preload all images
-    i.e. just list all images in 'images_to_preload'
-
-add QUD manipulation
-    by participant: yes or no (target 25% no in order to get similar data quantity for each condition)
-    within: first, second, or both-targeting
 
 record QUD manipulation in by-trial data
-  if global QUD = none, then make every trial's data 'none'
+    if global QUD = none, then make every trial's data 'none'
 
-add QUDs to training for relevant participants??
+check all stimuli to make sure coded correctly
+
+check Sabine's QUDs to make sure they work
+    note esp "not sure about this one" Qs
+
+change participant ID to live on lines 193-6
+
+can pay £1.2 per participant. or, need 2 exp versions: lhood and other. 
+        in pilot: lhood took 
+              Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+            3.624   5.280   6.477   8.094   8.551  26.554
+        vs others
+               Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+            1.998   3.471   4.307   5.153   5.770  32.659
+        so, pay lhood participants more - at $9/hr that should be
+            lhood: £1.2   if 8 minutes
+            others: £0.90 if 6 minutes
+
+
+stims - the following occurs twice
+    ana "The triangle is pink too."
+
+go through images - give them longer identifiers and use string.includes() method to match multiple stims to the same image
+    make sure this doesn't break anything in the likelihood trials!

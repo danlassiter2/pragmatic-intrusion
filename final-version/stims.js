@@ -1,179 +1,179 @@
-var test_csv_stims = [
+var stims = [
+  { 
+    content_type: "con", 
+    prompt: "The square is pink and is left of the circle.",
+    prompt_name: "con1",
+    qud1: "What colour is the square?", 
+    qud2: "Where is the square?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "con", 
+    prompt: "The square is pink and is left of the circle.",
+    prompt_name: "con2",
+    qud1: "What colour is the square?", 
+    qud2: "Where is the square?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "con", 
+    prompt: "The square is pink and is left of the circle.",
+    prompt_name: "con3",
+    qud1: "What colour is the square?", 
+    qud2: "Where is the square?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+    { 
+    content_type: "con", 
+    prompt: "The square is pink and is left of the circle.",
+    prompt_name: "con4",
+    qud1: "What colour is the square?", 
+    qud2: "Where is the square?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
   { 
     content_type: "ana", 
     prompt: "The triangle is pink too.",
-    prompt_name: "ana",
+    prompt_name: "ana1",
     qud1: "What colour is the triangle?", 
-    qud2: "Are there shapes other than the triangle that are pink?", 
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle? [Where is the square?]",
+    qud2: "Besides the triangle, is any other shape pink?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "ana", 
     prompt: "The triangle is pink too.",
-    prompt_name: "ana",
+    prompt_name: "ana2",
     qud1: "What colour is the triangle?", 
-    qud2: "Are there shapes other than the triangle that are pink?", 
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "only", 
-    prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "What colour is the square?", 
-    qud2: "Are there shapes other than the square that are green?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
+    qud2: "Besides the triangle, is any other shape pink?", 
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "ana", 
     prompt: "The triangle is pink too.",
-    prompt_name: "ana",
+    prompt_name: "ana3",
     qud1: "What colour is the triangle?", 
-    qud2: "Are there shapes other than the triangle that are pink?", 
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "only", 
-    prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "(not sure about this one - is there a square? or what colour is the square?)", 
-    qud2: "Are there shapes other than the square that are green?",
+    qud2: "Besides the triangle, is any other shape pink?", 
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "ana", 
     prompt: "The triangle is pink too.",
-    prompt_name: "ana",
-    qud1: "(not sure about this one - is there a triangle? or what colour is the triangle?)", 
-    qud2: "Are there shapes other than the triangle that are pink?",
+    prompt_name: "ana4",
+    qud1: "What colour is the triangle?", 
+    qud2: "Besides the triangle, is any other shape pink?", 
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "only", 
     prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "Are there shapes other than the square that are green?", 
-    qud2: "What colour is the square?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "(not sure about this one - is there more than one circle?)",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
+    prompt_name: "only1",
     qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "arc", 
-    prompt: "The circle, which is blue, is right of the triangle.",
-    prompt_name: "arc",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
-    qud3: "What can you tell me about the shapes?", 
-    qud4: ""
-  },
-  { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
-    qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
+    qud2: "Besides the square, is any other shape green?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "only", 
     prompt: "Only the square is green.",
-    prompt_name: "only",
-    qud1: "Are there shapes other than the square that are green?", 
-    qud2: "What colour is the square?",
+    prompt_name: "only2",
+    qud1: "What colour is the square?", 
+    qud2: "Besides the square, is any other shape green?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle?",
+    content_type: "only", 
+    prompt: "Only the square is green.",
+    prompt_name: "only3",
+    qud1: "What colour is the square?",  
+    qud2: "Besides the square, is any other shape green?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+   { 
+    content_type: "only", 
+    prompt: "Only the square is green.",
+    prompt_name: "only4",
+    qud1: "What colour is the square?",  
+    qud2: "Besides the square, is any other shape green?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
-    content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
-    prompt_name: "con",
-    qud1: "What colour is the square?", 
-    qud2: "Where is the square in relation to the circle?",
+    content_type: "arc", 
+    prompt: "The circle, which is blue, is right of the triangle.",
+    prompt_name: "arc1",
+    qud1: "Where is the circle?", 
+    qud2: "What colour is the circle?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "arc", 
+    prompt: "The circle, which is blue, is right of the triangle.",
+    prompt_name: "arc2",
+    qud1: "Where is the circle?", 
+    qud2: "What colour is the circle?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "arc", 
+    prompt: "The circle, which is blue, is right of the triangle.",
+    prompt_name: "arc3",
+    qud1: "Where is the circle?", 
+    qud2: "What colour is the circle?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "arc", 
+    prompt: "The circle, which is blue, is right of the triangle.",
+    prompt_name: "arc4",
+    qud1: "Where is the circle?", 
+    qud2: "What colour is the circle?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "def_ex", 
     prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
+    prompt_name: "def_ex1",
+    qud1: "Where is the circle in relation to the triangle?", 
+    qud2: "What colour is the circle?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "def_ex", 
+    prompt: "The blue circle is next to the triangle.",
+    prompt_name: "def_ex2",
+    qud1: "Where is the circle in relation to the triangle?", 
+    qud2: "What colour is the circle?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "def_ex", 
+    prompt: "The blue circle is next to the triangle.",
+    prompt_name: "def_ex3",
+    qud1: "Where is the circle in relation to the triangle?", 
+    qud2: "What colour is the circle?",
+    qud3: "What can you tell me about the shapes?", 
+    qud4: ""
+  },
+  { 
+    content_type: "def_ex", 
+    prompt: "The blue circle is next to the triangle.",
+    prompt_name: "def_ex4",
     qud1: "Where is the circle in relation to the triangle?", 
     qud2: "What colour is the circle?",
     qud3: "What can you tell me about the shapes?", 
@@ -182,7 +182,7 @@ var test_csv_stims = [
   { 
     content_type: "def_un", 
     prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
+    prompt_name: "def_un1",
     qud1: "Where is the circle in relation to the triangle?", 
     qud2: "(not sure about this one - is there more than one circle?)",
     qud3: "What can you tell me about the shapes?", 
@@ -191,7 +191,7 @@ var test_csv_stims = [
   { 
     content_type: "def_un", 
     prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
+    prompt_name: "def_un2",
     qud1: "Where is the circle in relation to the triangle?", 
     qud2: "(not sure about this one - is there more than one circle?)",
     qud3: "What can you tell me about the shapes?", 
@@ -200,20 +200,19 @@ var test_csv_stims = [
   { 
     content_type: "def_un", 
     prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un",
+    prompt_name: "def_un3",
     qud1: "Where is the circle in relation to the triangle?", 
     qud2: "(not sure about this one - is there more than one circle?)",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
-    content_type: "def_ex", 
-    prompt: "The blue circle is next to the triangle.",
-    prompt_name: "def_ex",
+    content_type: "def_un", 
+    prompt: "The circle is left of the triangle.",
+    prompt_name: "def_un4",
     qud1: "Where is the circle in relation to the triangle?", 
-    qud2: "What colour is the circle?",
+    qud2: "(not sure about this one - is there more than one circle?)",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   }
 ];
-
