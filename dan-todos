@@ -10,7 +10,7 @@ run through each condition and check for bugs, look at output data
 
 before running:
 
-change participant ID to live on lines 193-6
+check estimate of time in info sheet
 
 make sure all relevant variables are being recorded
     notably, QUD manipulation in by-trial data

@@ -592,7 +592,7 @@ function make_test_trial(target_content_type) {
     var target_truth_value = "NA";
     var target_image_filename = "NA";
     // will stay NA if we are in the likelihood condition, otherwise overwritten with target TV & image filename
-    var all_TVs = "";
+    var all_TVs = [];
     for (var i=0; i<4; i++) { 
         // randomly select a TV for the relevant image
         var truth_value = jsPsych.randomization.sampleWithReplacement(truth_values, 1);
@@ -617,7 +617,7 @@ function make_test_trial(target_content_type) {
             target_truth_value = truth_value;
             target_image_filename = image_filename;
         }
-        all_TVs = all_TVs + truth_value + "-";
+        all_TVs.push(truth_value);
     }
  
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
