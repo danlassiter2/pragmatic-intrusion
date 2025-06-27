@@ -282,7 +282,7 @@ if (qud_global == "no") {
 // create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
 // the test trials will be built and thereby presented (i.e. the randomisation of trial order happens already here)
 // This way can easily adjust number of total trials up or down (and keep an equal number of each content type)
-var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only","scalar"], 5); 
+var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only", "scalar", "numeral"], 4); 
 //console.log(target_content_types);
 
 /******************************************************************************/
@@ -626,6 +626,19 @@ function make_test_trial(target_content_type) {
     var target_truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
     //console.log(target_truth_value); 
 
+    // the scalar items don't have a ff condition, bc that would mean the primary (some) and secondary (not all) are both false, impossibly
+    if (target_content_type == 'scalar') {
+        while (target_truth_value == 'ff') {
+            target_truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
+        }
+    }
+    // the numeral items don't have a ft condition, bc that would mean the primary (at least one) is false but secondary (exactly one) is true, impossibly
+    if (target_content_type == 'scalar') {
+        while (target_truth_value == 'ff') {
+            target_truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
+        }
+    }
+
     // set trial stims to be determined by what is input as the target content type when trial building function is called below 
     // so this returns everything in the stim list (the pretend csv) that matches the current target content type
     var trial_stims_pool = stims.filter(function(row) {return row.content_type == target_content_type;});
@@ -644,13 +657,13 @@ function make_test_trial(target_content_type) {
     var qud = target_stim[qud_assignment]; 
 
     // build target scene/image filename
-    // choose randomly between items 1-4 for that content type
-    //var target_prompt_name = target_stim.prompt_name.concat(jsPsych.randomization.sampleWithReplacement([1,2,3,4], 1)[0]);
+    // choose randomly between items 1-3 for that content type
+    var target_prompt_name = target_stim.prompt_name.concat(jsPsych.randomization.sampleWithReplacement([1,2,3], 1)[0]);
 
     //
     // DEV ONLY - REPLCE WITH ABOVE ONCE STIMS READY
     //
-    var target_prompt_name = target_stim.prompt_name + 1;
+    //var target_prompt_name = target_stim.prompt_name + 1;
     //
     console.log(target_prompt_name);
 
@@ -666,6 +679,12 @@ function make_test_trial(target_content_type) {
     var target_image_filename = "stimuli/".concat(target_prompt_name,"-",target_truth_value,"-",imgNum,".jpg");
     //console.log(target_image_filename);
 
+    //
+    // NEED TO REVISE THIS - MAKE A LIST OF ALL IMAGE FILENAMES, preload them all into images_to_preload, THEN SEARCH the list FOR THE CORRECT IMAGE USING THE string.includes() method
+    //
+    // build a function that does this and outputs an array, then pick one match at random
+    //
+    // also revise the below lines to randomly pick 3 further truth values and find relevant images
 
     // add filename to the list of images to preload
     images_to_preload.push(target_image_filename);
