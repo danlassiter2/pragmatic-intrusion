@@ -85,8 +85,8 @@ var stims = [
     content_type: "only", 
     prompt: "Only the circle is pink.",
     prompt_name: "only3",
-    qud1: "What color is the square?",  
-    qud2: "Besides the square, is any other shape green?",
+    qud1: "What color is the circle?",  
+    qud2: "Besides the circle, is any other shape pink?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -169,27 +169,28 @@ var stims = [
   },
   { 
     content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
+    prompt: "The triangle is pink.",
     prompt_name: "def_un2",
-    qud1: "Where is the circle?", 
-    qud2: "Is there more than one circle?",
+    qud1: "What color is the triangle?", 
+    qud2: "Is there more than one triangle?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "def_un", 
-    prompt: "The circle is left of the triangle.",
-    prompt_name: "def_un3",
-    qud1: "Where is the circle?", 
-    qud2: "Is there more than one circle?",
+    prompt: "The blue square is right of the circle.",
+    prompt_name:  "def_un3",
+    qud1: "Where is the blue square?", 
+    qud2: "Is there more than one square?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
    // scalar items:
   // tt = some, not all
-  // tf = some, all
-  // ft = none
-  // ff = none & all - IMPOSSIBLE
+  // tf = some & all = all
+    // uniquely here, images for scalar1-tf are identical bc only one way to instantiate
+  // ft = not some and not all = none
+  // ff = not some & all - IMPOSSIBLE
   { 
     content_type: "scalar", 
     prompt: "Some of the circles are green.",

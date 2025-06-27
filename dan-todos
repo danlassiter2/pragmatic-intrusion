@@ -2,13 +2,9 @@
 
 check all stimuli to make sure coded correctly
 
-add images for 3 scalar implicature items
+check all QUDs
 
-add 2 more sentences, QUDs, images for each other type of item
-
-go through images - give them longer identifiers and use string.includes() method to match multiple stims to the same image
-    make sure this doesn't break anything in the likelihood trials!
-
+run through each condition and check for bugs, look at output data
 
 =======
 

@@ -39,7 +39,7 @@ async function fetch_with_retry(...args) {
       await new Promise(x => setTimeout(x, 250));
     }
     throw new Error("Too many retries");
-  }
+}
 
 /******************************************************************************/
 /*** Initialise jsPsych *******************************************************/
@@ -59,7 +59,17 @@ var jsPsych = initJsPsych({
 /*** Maintaining a list of images to preload **********************************/
 /******************************************************************************/
 
-var images_to_preload = [];
+var images_to_preload = ["stimuli/ana1-ff-1+arc2-ft-1+arc3-tt-2.jpg","stimuli/ana1-ff-2+only2-tt-1+def_ex2-tf-2.jpg","stimuli/ana1-ft-1+ana2-tt-2+only2-ft-1+arc2-ft-2.jpg","stimuli/ana1-ft-2+only2-ft-2+arc2-tf-1+arc3-tf-1+scalar2-tt-2.jpg","stimuli/ana1-tf-1+only2-ff-1.jpg","stimuli/ana1-tf-2+arc2-ff-1+def_ex2-ft-1.jpg","stimuli/ana1-tt-1+ana2-tf-1+only2-ff-2+def_ex-ft-2.jpg","stimuli/ana1-tt-2+def_ex3-tt-1.jpg","stimuli/arc1-ff-1+con2-tt-1+ana3-tf-1+only2-tt-2+def_ex2-ff-1.jpg","stimuli/arc1-ff-2+ana2-tf-2+ana3-tf-2.jpg","stimuli/arc1-ft-1+ana3-ft-1+def_ex3-tt-2.jpg","stimuli/arc1-ft-2+con3-ff-2.jpg","stimuli/arc1-tf-1+only2-tf-1+def_ex2-ff-2.jpg","stimuli/arc1-tf-2+arc3-tf-2.jpg","stimuli/arc1-tt-1+ana2-ft-2.jpg","stimuli/arc1-tt-2+ana2-ft-1+only2-tf-2.jpg","stimuli/arc3-ft-1+def_ex2-tf-1.jpg","stimuli/arc3-ft-2.jpg","stimuli/con1-ff-1+con2-tf-1+only3-ff-2+arc2-ff-2+def_un3-tt-1.jpg","stimuli/con1-ff-2+con2-ft-2+con3-ff-1+ana2-tt-1+ana3-ft-2+def_un3-tt-2.jpg","stimuli/con1-ft-1+ana3-ff-1+def_ex3-tf-1+def_un3-ft-2+def_ex2-ft-2.jpg","stimuli/con1-ft-2+con2-ff-1+con3-ft-2+ana2-ff-1.jpg","stimuli/con1-tf-1+ana3-tt-2.jpg","stimuli/con1-tf-2.jpg","stimuli/con1-tt-1+con3-tt-1+arc2-tt-1+arc3-tt-1+def_ex3-tf-2.jpg","stimuli/con1-tt-2+ana3-ff-2+only3-ff-1.jpg","stimuli/def_ex1-ff-1+ana2-ff-2+only3-ft-2+arc2-tt-2.jpg","stimuli/def_ex1-ft-1+def_un-ft-2.jpg","stimuli/def_ex1-ft-2.jpg","stimuli/def_ex1-tf-1+def_un-ft-1.jpg","stimuli/def_ex1-tf-2+con2-tf-2+con3-ft-1+def_un3-ft-1.jpg","stimuli/def_ex1-tt-1+con2-ft-1+def_ex2-tt-1.jpg","stimuli/def_ex1-tt-2+con3-tf-1+con2-ff-2.jpg","stimuli/def_ex2-tt-2+scalar2-ft-2.jpg","stimuli/def_un1-ff-1+scalar2-ft-1+numeral2-tf-2.jpg","stimuli/def_un1-ff-2+only3-tt-1+scalar3-ft-2.jpg","stimuli/def_un1-ft-1+con3-tt-2+def_ex1-ff-2.jpg","stimuli/def_un1-ft-2+scalar2-tt-1.jpg","stimuli/def_un1-tf-1+numeral2-ff-1.jpg","stimuli/def_un1-tf-2+only3-ft-1+scalar3-ft-1+numeral2-tt-2.jpg","stimuli/def_un1-tt-1+con3-tf-2+arc2-tf-2.jpg","stimuli/def_un1-tt-2+arc3-ff-1+numeral1-tt-2.jpg","stimuli/def_un2-ff-1+numeral1-tf-1.jpg","stimuli/def_un2-ff-2.jpg","stimuli/def_un2-tf-1.jpg","stimuli/def_un2-tf-2+numeral1-tf-2.jpg","stimuli/def_un3-ff-1+numeral1-ff-1.jpg","stimuli/def_un3-ff-2+scalar2-tf-1.+scalar3-tt-1jpg.jpg","stimuli/def_un3-tf-1+scalar3-tt-2.jpg","stimuli/def_un3-tf-2+scalar2-tf-2+numeral3-ff-1.jpg","stimuli/numeral3-ff-2.jpg","stimuli/numeral3-tf-1.jpg","stimuli/numeral3-tf-2.jpg","stimuli/numeral3-tt-2.jpg","stimuli/only1-ff-1.jpg","stimuli/only1-ff-2+only3-tf-2+def_ex3-ff-2+def_un2-ft-2.jpg","stimuli/only1-ft-1+numeral1-tt-1.jpg","stimuli/only1-ft-2+con2-tt-2+ana3-tt-1+only3-tf-1+arc3-ff-2+def_ex3-ft-1.jpg","stimuli/only1-tf-1+only3-tt-2+def_un2-ft-1.jpg","stimuli/only1-tf-2+cons-ft-2+def_ex3-ff-1.jpg","stimuli/only1-tt-1+def_un2-tt-2.jpg","stimuli/only1-tt-2+def_ex3-ft-2+def_un2-tt-1.jpg","stimuli/scalar1-ft-1+numeral2-tt-1.jpg","stimuli/scalar1-ft-2+numeral2-tf-1.jpg","stimuli/scalar1-tf-1.jpg","stimuli/scalar1-tf-2+numeral2-ff-2.jpg","stimuli/scalar1-tt-1.jpg","stimuli/scalar1-tt-2.jpg","stimuli/scalar3-tf-1.jpg","stimuli/scalar3-tf-2+numeral1-ff-2+numeral3-tt-1.jpg"];
+
+function find_imgs(str) {
+    var matches = []
+    for (filename of images_to_preload) {
+        if (filename.includes(str)) {
+            matches.push(filename);
+        }
+    }
+    return matches;
+}
 
 /******************************************************************************/
 /*** Saving experiment data trial by trial ************************************/
@@ -73,16 +83,14 @@ function save_data(name, data_in) {
       body: JSON.stringify(data_to_send),
       headers: new Headers({
         "Content-Type": "application/json",
-      }),
+        }),
     });
-  }
+}
 
 /*
 The following code will save data from critical trials line by line. 
 
-Note that experiment data is saved to a file named pragdep_ID.csv, where pragdep stands for 
-Pragmatics of dependent measures and ID is the randomly-generated participant ID or
-Prolific ID, depending on which version of exp is run (dev or live).
+Note that experiment data is saved to a file named pragdep_ID.csv, where pragdep stands for "Pragmatics of dependent measures". ID is the randomly-generated participant ID or Prolific ID, depending on which version of exp is run (dev or live).
 
 Survey data (demographics and feedback) is saved in its own file, named pragdep_ID_survey.csv.
 */
@@ -93,19 +101,17 @@ function save_pragdep_data_line(data) {
         participant_id,
         data.condition,
         data.response_format, // slider or radio buttons (this will also be clear from response)
-        data.block, // traning or test
+        data.block, // training or test
         data.training_trial_counter,
         data.test_trial_counter,
         data.trial_index,
         data.target_truth_value,
+        data.all_TVs,
         data.target_content_type,
         data.linguistic_prompt,
         data.target_image,
         data.qud,
-        ...data.images_in_order, // saves all images in the presented order (0-3). The ... is called spread, is applied within another 
-        // array to make them into elements in the top level array (instead of a nested array). Ex: [...[1,2],3]=[1,2,3]. Avoids issue
-        // with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (and we want this array 
-        // to be split for readability in the csv file later)
+        ...data.images_in_order, // saves all images in the presented order (0-3). The ... is called spread, is applied within another array to make them into elements in the top level array (instead of a nested array). Ex: [...[1,2],3]=[1,2,3]. Avoids issue with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (and we want this array to be split for readability in the csv file later)
         data.response,
         data.time_elapsed,
         data.rt,
@@ -153,13 +159,17 @@ function save_survey_line(data) {
 /******************************************************************************/
 
 // just creating random ID for internal piloting as won't be through Prolific
-var participant_id = jsPsych.randomization.randomID(10);
+// var participant_id = jsPsych.randomization.randomID(10);
 
 // Will change to this to extract Prolific IDs: UNCOMMENT before posting on Prolific (live version only)
-// var participant_id = jsPsych.data.getURLVariable("PROLIFIC_PID");
+var participant_id = jsPsych.data.getURLVariable("PROLIFIC_PID");
 
-// record the participant ID in the jsPsych data so this can be accessed by the backup 
-// "save all data" code (lines 65-70) 
+// for testing not on prolific, generate a random id
+if (participant_id == null) {
+    var participant_id = jsPsych.randomization.randomID(10);
+}
+
+// record the participant ID in the jsPsych data so this can be accessed by the backup "save all data" code (lines 65-70) 
 // this adds a data property called 'participant_id' to every trial
 jsPsych.data.addProperties({
     participant_id: participant_id,
@@ -203,11 +213,8 @@ if (responseformat_assignment == "radio") {
 //      75% of participants will see randomly selected QUDs by trial
 //      25% will see no QUDs anywhere
 var qud_global = jsPsych.randomization.sampleWithoutReplacement(["yes", "yes", "yes", "no"], 1)[0];
-//console.log("QUD:", qud_global);
 
-// Set the text and names for the response options and the instructions in a trial based on
-// response format, condition assignment 
-// (NEW: and qud assignment determined above) (to pass to trial building function).
+// Set the text and names for the response options and the instructions in a trial based on response format, condition assignment and qud assignment determined above, to pass to trial building function).
 // if the response format is radio, set these values for each of the conditions:
 // (note that likelihood is not included here as we are not doing binary likelihood trials) 
 // NEW: added conditionals for QUDs here - i.e. if qud_global is 'no', follow Vilde's setup, else use "How true is the response above" for instruction 
@@ -271,21 +278,6 @@ if (qud_global == "no") {
 //console.log("Response options:", response_options);
 
 /******************************************************************************/
-/*** Create the stimuli list **************************************************/
-/******************************************************************************/
-
-// this simulates reading in a csv stim list, but is just storing all the relevant info needed later. 
-// NEW: added QUDs
-
-
-
-// create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
-// the test trials will be built and thereby presented (i.e. the randomisation of trial order happens already here)
-// This way can easily adjust number of total trials up or down (and keep an equal number of each content type)
-var target_content_types = jsPsych.randomization.repeat(["con", "arc", "ana", "def_ex", "def_un", "only", "scalar", "numeral"], 4); 
-//console.log(target_content_types);
-
-/******************************************************************************/
 /*** Creating training trials *************************************************/
 /******************************************************************************/
 
@@ -307,7 +299,7 @@ non-prob trials: two trials that are clearly appropriate/true and one that clear
 
 // function to build a training trial
 // NEW: added qud to this
-function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
+function make_training_trial(prompt, target, filler_1, filler_2, filler_3) {
     
     // build image file paths
     var target_filename = "stimuli/training_stims/" + target + ".jpg"; 
@@ -321,8 +313,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
     //console.log(images_unshuffled)
     images_to_preload.push(...images_unshuffled); // using spread to avoid preload list having a nested array; seems to work
     var images = jsPsych.randomization.shuffle(images_unshuffled);
-    //console.log(images)
-    //console.log(images.indexOf(target_filename)) // gets index of target image in the array of images
+
 
     // set the highlighted image index dependening on condition assignment 
     if (condition_assignment == "likelihood") {
@@ -342,8 +333,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         correct_answer = ["False", "Unacceptable"]; 
         }
     } else if (responseformat_assignment == "slider") { 
-        // note that we specify fairly generous ranges for what counts as correct in slider trials, although we'd expect 
-        // very close to exact values for these (as listed)
+        // specify fairly generous ranges for what counts as correct in slider trials, although we'd expect very close to exact values for these (as listed)
         if (target == "target-A") {
         correct_answer = [85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]; // expect 100 or close to
         } else if (target == "target-B") {
@@ -354,48 +344,39 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             } else if (condition_assignment == "likelihood") {
             correct_answer = [40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60];} // expect 50 or close to
         } else if (target == "target-C") {
-            correct_answer = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; // expect 0 or close to 
-        }
-        // NOTE This is not an elegant solution for specifying the range, but only reasonable alternative I found was to create
-        // a function to define a range which ends up being more lines of code anyway so for now keeping as this (although higher
-        // risk of typos with this method so may want to change!)
-    };
-    //console.log(correct_answer);
+            correct_answer = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]; 
+        };
+    }
+  
     var correct_answer = correct_answer; 
-    // seems I have to store this for the trial variable below to be able to access it. 
-    // Can't tell why, as e.g. "index" seems to be accesible even when it's not stored in a variable..!
+    // seems we have to store this for the trial variable below to be able to access it. 
 
     // Counter variable for storing how often a training trial was retaken; it will start from 1 every time the training trial building
     // function is called, i.e. it will reset to 1 for each of the three trials
     var training_trial_counter = 1; 
 
     // a subtrial that builds the training trial
-     var training_trial = {
+    var training_trial = {
         type: plugin_type,
         images: images,
-        preamble: "<br>" + instruction, // adding white space above to avoid it jumping around if "incorrect" is shown after
-        prompt: prompt, // currently going with specifying this in function input
-        labels: response_options, // currently not working correctly for sliders - although might work when putting into main?
-        // think it may be because slider plugin has the parameter called "labels", and radio plugin has "options"!
-        // yep, that's right! So either have type not be dynamic and build this function like test trial, or change name of parameter
-        // in radio plugin (if possible)
-        // NOTE Pro type not dynamic: can set slider width. Con: Code for training block will be v long and repetitive..
-        highlighted_image_index: index, // this will depend on target, like in test (only relevant for non-prob trials)
+        preamble: "<br>" + instruction, 
+        prompt: prompt, 
+        labels: response_options, 
+        highlighted_image_index: index, // this will depend on target, like in test 
 
         //at the start of the trial, make a note of all relevant info to be saved
         on_start: function (trial) { // NOTE: in main exp, the text in brackets matches name of the variable ("training_trial")
-            // but want to test whether that is necessary or can just have it sat "trial" as Maisy has had it
-            // UPDATE Seems to work!
-            trial.data = { // same here, this before said "training_trial.data" UPDATE seems to work
+            trial.data = { 
                 condition: condition_assignment,
                 response_format: responseformat_assignment,
                 block: "training", 
                 training_trial_counter: training_trial_counter, // starts off with the value set outside of the plugin, i.e. 1, will be added to (+1) 
                 // every time the incorrect_feedback is shown, i.e. every time the participant is prompted to try again
-                test_trial_counter: "na", 
-                target_truth_value: "na", 
-                target_content_type: "na",
-                qud: "na", 
+                test_trial_counter: "NA", 
+                target_truth_value: "NA", 
+                all_TVs: "NA",
+                target_content_type: "NA",
+                qud: "NA", 
                 linguistic_prompt: prompt, 
                 target_image: target_filename,
                 images_in_order: images, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
@@ -403,25 +384,14 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             };
         },
         on_finish: function (data) {
-            // save to data property whether response was correct (=true) or incorrect (=false)
-            // if(data.response === correct_answer){data.correct = true} // old method of checking when only one element in correct_answer
-            // New method: check if response is included in the correct_answer array - set data.correct as "true" if it is
+            // check if response is included in the correct_answer array - set data.correct as "true" if it is
             if(correct_answer.includes(data.response)){data.correct = true} 
             // NOTE: === is identity (i.e. will check for match and type), == is only looking for equality (so will check for match 
             // but not in type; e.g. the following will all return true: 1 == '1', 1 == 1, 1 == true)
             else {data.correct = false}
-            //console.log(correct_answer); // this is where the issue lies! But don't know why.. UPDATE: stored the variable and now
-            // it works. Guess it wasn't accessible in the same way the others were, though don't know why! E.g. index works fine
-            // without being stored as a variable...
-            //console.log(data.response); // ISSUE is that response is stored as e.g. "truth", i.e. the same as condition. CHECK if that
-            // is also what happens in the main exp! UPDATE Have fixed that, now it stores the actual text of the button (note; is
-            // case-sensitive!)
-            //console.log(data.correct); // evalutes correctly! 
             save_pragdep_data_line(data); //save the trial data 
         },
     };
-        //console.log(training_trial);
-        //console.log(response_options);
 
     // a subtrial that appears if the participant chooses the wrong response
     var incorrect_feedback = {
@@ -437,13 +407,13 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
                 condition: condition_assignment,
                 response_format: responseformat_assignment,
                 block: "training",
-                training_trial_counter: ++training_trial_counter, // this means it will add 1 to whatever the variable is now. 
-                // Note: ++ needs to come before the variable to return the incremented number (if it comes after it will return 
-                //the value of the variable before it was incremented on, which is not useful here)
-                test_trial_counter: "na",
-                target_truth_value: "na", 
-                target_content_type: "na", 
-                qud: "na",
+                training_trial_counter: ++training_trial_counter, // will add 1 to whatever the variable is now. 
+                // Note: ++ needs to come before the variable to return the incremented number (if it comes after it will return the value of the variable before it was incremented on, which is not useful here)
+                test_trial_counter: "NA",
+                target_truth_value: "NA", 
+                all_TVs: "NA",
+                target_content_type: "NA", 
+                qud: "NA",
                 linguistic_prompt: prompt, 
                 target_image: target_filename,
                 images_in_order: images, 
@@ -451,14 +421,9 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         },
         on_finish: function (data) {
             // save to data property whether response was correct (=true) or incorrect (=false)
-            //if(data.response === correct_answer){data.correct = true} // old way of checking when only one element in correct_answer
             if(correct_answer.includes(data.response)){data.correct = true}  
             else {data.correct = false}
-            //console.log(correct_answer); 
-            //console.log(data.response); 
-            //console.log(data.correct);
             save_pragdep_data_line(data); //save the trial data 
-            //console.log(images);
         },
     };
 
@@ -467,7 +432,6 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         timeline: [incorrect_feedback],
         conditional_function: function () {
             var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct // gets what data.correct was stored as 
-            //console.log(last_trial_correct);
             if(last_trial_correct == false) { // if response in most recent trial was stored as false, i.e. incorrect, then
                 return true; // means we *will* run the incorrect_feedback timeline
             } else {
@@ -476,10 +440,10 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         }
     };
 
-    // a loop that says to show incorrect feedback every time the participant chooses the wrong answer
+    // show incorrect feedback every time the participant chooses the wrong answer
     var retry_loop = {
         timeline: [conditional_node],
-        loop_function: function () { // NOTE Removed "data" from brackets (Maisy had that) but seems to work anyway!
+        loop_function: function () { 
             var last_trial_correct = jsPsych.data.get().last(1).values()[0].correct
             if(last_trial_correct == false) { 
                 return true; // means we *will* run the conditional_node timeline
@@ -489,8 +453,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
         },
     };
 
-    // set the feedback that will be displayed when a participant chooses the correct response, 
-    // to be used in the correct_feedback subtrial below
+    // set the feedback that will be displayed when a participant chooses the correct response, to be used in the correct_feedback subtrial below
     if (condition_assignment == "truth") { 
         if (responseformat_assignment == "radio") {
             if (target == "target-A") {
@@ -537,16 +500,13 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3){
             correct_response = "the sentence couldn't possibly be true.</p>";
         }
     }
-    //console.log(correct_response);
-    var correct_response = correct_response; // again, seems like it needed to be stored in a variable to be properly accessible
+    var correct_response = correct_response; // needs to be stored in a variable to be properly accessible
 
     // a subtrial that appears if the participant chooses the correct response
-    var correct_feedback = { // works, but need some finetuning for how we store correct_answer for slider trials (see lines 175-185)
+    var correct_feedback = { 
         type: jsPsychHtmlButtonResponse, 
         stimulus: function () {
         // if the trial was a likelihood trial, show all four images in feedback
-        //var answer = jsPsych.data.get().last(1).values()[0].response; // store response from most recent trial (i.e. the correct one)
-        // NOTE used the above line of code for showing the answer in feedback, but looks funny with slider trials so went for a different method
         if (condition_assignment == "likelihood") {
             return prompt + "<p><b style=color:forestgreen>Correct! Here, if a card is picked at random </br>" + correct_response +
             // The answer is \"" + answer + "\".<p>" + 
@@ -582,158 +542,93 @@ var training_trials = [
 /*** Creating testing trials **************************************************/
 /******************************************************************************/
 
-/* Steps:
-NOTE: ADD LIST HERE to explain what the code does (short summary), or have this in the preamble
-*/
-
 /*
-CURRENT METHOD: since we want 5 of each content type and 30 trials in total, we first make an array of the 6 content 
-types and repeat 5 times with shuffling. Then we create the trial building function, then loop through the content types array 
-to input each of those content types in turn and thereby build the individual trials. Since the content types array is shuffled 
-when created, we don't need to randomise the order of the trials when the loop is finished, we can simply send that list 
-of trials to the timeline as is. 
+There are 8 content types.
 
-The trial building function chooses the set of images to be used in any one trial to be of the same content type. This is so
-that we have control of the truth value for each of the filler images (relevant for probability trials) and not just the target
-image, as it means that the image names for fillers will indeed be correct for that combination of content type and prompt (it 
-also means that there is a decent chance some of the images will be the same in any given trial). 
+The conjunctive, anaphoric, only, ARC, def_ex, and def_un types instantiate all possible combinations of primary and secondary truth-value: TT, TF, FT, FF.
 
-Note: at current there is only one prompt per content type, so may need to make some edits if adding more later. Note also that
-the current approach for fillers where they are chosen from the pool of images that have the same content type as
-the target, in practice means that it is choosing from all images with that content type since there are only 4 images per 
-content type + prompt at the moment. However, the code is written so that it can choose from a larger pool, if we decide to add
-more images per content type + prompt combination later.
+The scalar and numerical items only have 3 possible TV combinations, because one of the combinations is logically impossible due to entailment relations btw the primary and secondary contents.
+
+For each possible content type/TV combination we associate two images. The only exception is the TF version of hte scalar item "Some of the circles are green", where only one image is possible bc the TF combination requires that all of the images be green circles.
+
+The trial building function chooses the set of images to be used in any one trial to be of the same content type. This is so that we have control of the truth value for each of the filler images (relevant for probability trials) and not just the target image, as it means that the image names for fillers will indeed be correct for that combination of content type and prompt. 
+
 */
 
-// Counter variable for storing the index of a test trial for data saving purposes; it will start from 1 and be incremented by +1 
-// every time the function is called below, i.e. every time the loop loops. Then when saving each trial it will take the trial
-// number from this variable
-var test_trial_counter = 0; // start from 0, because the loop will add 1 from the first time it's called so this means the first 
-// trial will end up with count 1
+// Counter variable for storing the index of a test trial for data saving purposes; it will start from 1 and be incremented by +1 every time the function is called below, i.e. every time the loop loops. Then when saving each trial it will take the trial number from this variable.
+var test_trial_counter = 0; 
 
 // function to create the trials
 function make_test_trial(target_content_type) {
     var qud_assignment;
-    if (qud_global == 'no') { // then this participant won't see any QUDs
+    if (qud_global == 'no') { 
+        // then this participant won't see any QUDs
         qud_assignment = 'qud4';
-    } else { // else choose a target at random by trial
+    } else { // else choose a QUD type at random by trial
         qud_assignment = jsPsych.randomization.sampleWithReplacement(['qud1','qud2','qud3'], 1)[0];
     }
 
-    // make array with all possible truth value combinations
     var truth_values = ["tt","tf","ft","ff"];
-    // randomly select one of them to be the target truth value in a trial
-    var target_truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
-    //console.log(target_truth_value); 
 
-    // the scalar items don't have a ff condition, bc that would mean the primary (some) and secondary (not all) are both false, impossibly
-    if (target_content_type == 'scalar') {
-        while (target_truth_value == 'ff') {
-            target_truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
+    // find all stims that match the target content type
+    var trial_stims_pool = stims.filter(
+        function(row) {
+            return row.content_type == target_content_type;
         }
-    }
-    // the numeral items don't have a ft condition, bc that would mean the primary (at least one) is false but secondary (exactly one) is true, impossibly
-    if (target_content_type == 'scalar') {
-        while (target_truth_value == 'ff') {
-            target_truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
-        }
-    }
+    );
 
-    // set trial stims to be determined by what is input as the target content type when trial building function is called below 
-    // so this returns everything in the stim list (the pretend csv) that matches the current target content type
-    var trial_stims_pool = stims.filter(function(row) {return row.content_type == target_content_type;});
-    //console.log(trial_stims_pool);
-    
-    // out of this pool of stims that all have the target content type for that trial, randomly choose 4 with replacement to populate the trial
-    // NOTE At current (12 June), there are 8 images associated with each prompt (note: prompt is identical to content type at current, since there is only one prompt for each content type - but this may change if adding more prompts):
-    // 2 images * 4 possible truth status combinations
-    var trial_stims = jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 4); 
-    //console.log(trial_stims);
-    
-    // of these, pick first element to be the target (relevant for non-probability trials, makes no difference for rest)
-    var target_stim = trial_stims[0]; 
+    // out of the three stims that all have the target content type for that trial, pick one to use for this trial
+    var trial_stim = jsPsych.randomization.sampleWithReplacement(trial_stims_pool, 1)[0]; 
 
     // Extract the qud that has been assigned from the target stimulus
-    var qud = target_stim[qud_assignment]; 
-
-    // build target scene/image filename
-    // choose randomly between items 1-3 for that content type
-    var target_prompt_name = target_stim.prompt_name.concat(jsPsych.randomization.sampleWithReplacement([1,2,3], 1)[0]);
-
-    //
-    // DEV ONLY - REPLCE WITH ABOVE ONCE STIMS READY
-    //
-    //var target_prompt_name = target_stim.prompt_name + 1;
-    //
-    console.log(target_prompt_name);
-
-    // NOTE: since there are two possible (uniquely named) scenes that can satisfy a given truth value and prompt combination, the image filename is set to randomly pick a number 1-2 for the scene index and include that in the filename
-        // 1+(Math.floor(Math.random() * 2));
-    // Explanation: start with 1, add generated random number between 0 (inclusive) and 1 (exclusive), multiply by 2, round up to whole number
-
-    //var target_image_filename = "stimuli/".concat(target_prompt_name,"-",target_truth_value,"-",1+(Math.floor(Math.random() * 2)),".jpg");
-    //console.log(target_image_filename);
-
-    var imgNum = jsPsych.randomization.sampleWithReplacement([1,2], 1)[0];
-
-    var target_image_filename = "stimuli/".concat(target_prompt_name,"-",target_truth_value,"-",imgNum,".jpg");
-    //console.log(target_image_filename);
-
-    //
-    // NEED TO REVISE THIS - MAKE A LIST OF ALL IMAGE FILENAMES, preload them all into images_to_preload, THEN SEARCH the list FOR THE CORRECT IMAGE USING THE string.includes() method
-    //
-    // build a function that does this and outputs an array, then pick one match at random
-    //
-    // also revise the below lines to randomly pick 3 further truth values and find relevant images
-
-    // add filename to the list of images to preload
-    images_to_preload.push(target_image_filename);
-    
-    // build filler scenes filenames from the remaining stims in trial stims (i.e. that have the same content type as target)
-    var filler_image_filenames = []
-    for (var i=1; i<4; i++) { 
-        filler_stim = trial_stims[i];
-        filler_image_filename = "stimuli/".concat(
-            filler_stim.prompt_name,
-            "-",
-            jsPsych.randomization.sampleWithoutReplacement(truth_values, 1), // randomly samples truth value 
-            "-",
-            1+(Math.floor(Math.random() * 2)), // randomly selects scene index (1 or 2)
-            ".jpg"
-        ); 
-        // IDEA if need to store filler image truth values, may be able to log it here? Can use console log and store in an object, or 
-        // do the randomisation and store in an object before putting together the filename
-        filler_image_filenames.push(filler_image_filename);
-        // also add to list of images to preload
-        images_to_preload.push(filler_image_filename);
-    }
-    //console.log(filler_image_filenames)
-
-    // put all the scenes together 
-    var selected_scenes_unshuffled = [].concat(target_image_filename, filler_image_filenames);
-    //console.log(selected_scenes_unshuffled)
-    // shuffle the selected scenes before passing to the trial plugin 
-    var selected_scenes = jsPsych.randomization.shuffle(selected_scenes_unshuffled);
-    //console.log(selected_scenes)
-    //console.log(selected_scenes.indexOf(target_image_filename)) // gets index of target image in the array of selected scenes
-
+    var qud = trial_stim[qud_assignment]; 
+    images_to_display = [];
     // set the highlighted image index and preamble depending on condition assignment 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
     } else {
-        index = selected_scenes.indexOf(target_image_filename); // else the highlight is determined by the position of the target image
+        index = jsPsych.randomization.sampleWithReplacement([0,1,2,3], 1)[0]; // else the highlight is determined by the position of the target image
     } 
+    var target_truth_value = "NA";
+    var target_image_filename = "NA";
+    // will stay NA if we are in the likelihood condition, otherwise overwritten with target TV & image filename
+    var all_TVs = "";
+    for (var i=0; i<4; i++) { 
+        // randomly select a TV for the relevant image
+        var truth_value = jsPsych.randomization.sampleWithReplacement(truth_values, 1);
+        // the scalar items don't have a ff condition, bc that would mean the primary (some) and secondary (not all) are both false, impossibly
+        if (target_content_type == 'scalar') {
+            while (truth_value == 'ff') {
+                truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
+            }
+        }
+        // the numeral items don't have a ft condition, bc that would mean the primary (at least one) is false but secondary (exactly one) is true, impossibly
+        if (target_content_type == 'numeral') {
+            while (truth_value == 'ft') {
+                truth_value = jsPsych.randomization.sampleWithoutReplacement(truth_values, 1);
+            }
+        }
+        // identify all images with target truth value for that item, then pick one at random
+        var image_candidates = find_imgs(trial_stim.prompt_name + "-" + truth_value);
+        var image_filename = jsPsych.randomization.sampleWithReplacement(image_candidates, 1)[0];
+        images_to_display.push(image_filename);
+        if (i == index) {
+            // record target truth value
+            target_truth_value = truth_value;
+            target_image_filename = image_filename;
+        }
+        all_TVs = all_TVs + truth_value + "-";
+    }
  
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
-    // NOTE It seems that type can be dynamic now, so can change this to be dynamic in the way it's done for the training trials if we want
-    // to. Keeping as is for now as that really is only cosmetic and the code works as is.
-    if (qud_assignment == "qud4") { //NEW: if qud4 is assigned, the "question" and "response" bits are not inserted
+    if (qud_assignment == "qud4") { 
+    // NEW: if qud4 is assigned, the "question" and "response" bits are not inserted
         if (responseformat_assignment== "radio") {
             // make trials using custom radio button plugin
             var trial = {
                 type: jsPsychImageArrayMultiChoice,
-                images: selected_scenes, 
-                preamble: qud + "</p><br>" +  target_stim.prompt + "</p><br>" +  instruction, 
+                images: images_to_display, 
+                preamble: qud + "</p><br>" +  trial_stim.prompt + "</p><br>" +  instruction, 
                 prompt: "",
                 labels: response_options,
                 highlighted_image_index: index,
@@ -742,19 +637,18 @@ function make_test_trial(target_content_type) {
                 on_start: function (trial) {
                     trial.data = {
                         condition: condition_assignment,
-                        qud: qud_assignment, //NEW: could also make this "qud" if we want to record the actual question rather than qud1, qud2 etc
+                        qud: qud_assignment, 
                         response_format: "radio",
                         block: "test",
-                        training_trial_counter: "na",
-                        test_trial_counter: ++test_trial_counter, // set to whatever value this has been set to after looping 
-                        // through trial building function below
-                        target_truth_value: target_truth_value, // seems to work even when name is the same for both
-                        target_content_type: target_content_type, // seems to work even when name is the same for both
-                        linguistic_prompt: target_stim.prompt, 
-                        target_image: target_image_filename,
-                        //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                        //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
-                        images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order,
+                        training_trial_counter: "NA",
+                        test_trial_counter: ++test_trial_counter, 
+                        // set to whatever value this has been set to after looping through trial building function below
+                        target_truth_value: target_truth_value, 
+                        all_TVs: all_TVs,
+                        target_content_type: target_content_type, 
+                        linguistic_prompt: trial_stim.prompt, 
+                        target_image: images_to_display[0],
+                        images_in_order: images_to_display, // saves the filenames in the order they were presented in a trial
                     };
                 },
                 on_finish: function (data) {
@@ -766,8 +660,8 @@ function make_test_trial(target_content_type) {
             // else make trials using custom slider plugin
             var slider_trial = {
                 type: jsPsychImageArraySliderResponse,
-                images: selected_scenes,
-                preamble: qud + "</p><br>" +  target_stim.prompt + "</p><br>" +  instruction, 
+                images: images_to_display,
+                preamble: qud + "</p><br>" +  trial_stim.prompt + "</p><br>" +  instruction, 
                 prompt: "",
                 labels: response_options,
                 highlighted_image_index: index,
@@ -780,16 +674,14 @@ function make_test_trial(target_content_type) {
                         qud: qud_assignment,
                         response_format: "slider",
                         block: "test",
-                        training_trial_counter: "na",
-                        test_trial_counter: ++test_trial_counter, // set to whatever value this has been set to after looping through 
-                        // trial building function below
-                        target_truth_value: target_truth_value, // seems to work even when name is the same for both
-                        target_content_type: target_content_type, // seems to work even when name is the same for both
-                        linguistic_prompt: target_stim.prompt, 
+                        training_trial_counter: "NA",
+                        test_trial_counter: ++test_trial_counter, 
+                        target_truth_value: target_truth_value, 
+                        all_TVs: all_TVs,
+                        target_content_type: target_content_type,
+                        linguistic_prompt: trial_stim.prompt, 
                         target_image: target_image_filename,
-                        //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                        //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
-                        images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                        images_in_order: images_to_display, 
                     };
                 },
                 on_finish: function (data) {
@@ -798,15 +690,15 @@ function make_test_trial(target_content_type) {
             };
             //console.log(slider_trial);
             return slider_trial;
-        } 
-        
-    } else { //NEW: if qud1-3 is assigned, the "question" and "response" bits are inserted
+        }     
+    } else { 
+    //NEW: if qud1-3 is assigned, the "question" and "response" bits are inserted
         if (responseformat_assignment== "radio") {
             // make trials using custom radio button plugin
             var trial = {
                 type: jsPsychImageArrayMultiChoice,
-                images: selected_scenes, 
-                preamble: "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + target_stim.prompt + "</p></br>" +  instruction, 
+                images: images_to_display, 
+                preamble: "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + trial_stim.prompt + "</p></br>" +  instruction, 
                 prompt: "",
                 labels: response_options,
                 highlighted_image_index: index,
@@ -815,19 +707,17 @@ function make_test_trial(target_content_type) {
                 on_start: function (trial) {
                     trial.data = {
                         condition: condition_assignment,
-                        qud: qud_assignment, //NEW: could also make this "qud" if we want to record the actual question rather than qud1, qud2 etc
+                        qud: qud_assignment,
                         response_format: "radio",
                         block: "test",
-                        training_trial_counter: "na",
-                        test_trial_counter: ++test_trial_counter, // set to whatever value this has been set to after looping 
-                        // through trial building function below
-                        target_truth_value: target_truth_value, // seems to work even when name is the same for both
-                        target_content_type: target_content_type, // seems to work even when name is the same for both
-                        linguistic_prompt: target_stim.prompt, 
+                        training_trial_counter: "NA",
+                        test_trial_counter: ++test_trial_counter, 
+                        target_truth_value: target_truth_value, 
+                        target_content_type: target_content_type, 
+                        linguistic_prompt: trial_stim.prompt, 
                         target_image: target_image_filename,
-                        //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                        //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
-                        images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order,
+                        images_in_order: images_to_display, 
+                        // saves the filenames in the order they were presented in a trial
                     };
                 },
                 on_finish: function (data) {
@@ -839,8 +729,8 @@ function make_test_trial(target_content_type) {
             // else make trials using custom slider plugin
             var slider_trial = {
                 type: jsPsychImageArraySliderResponse,
-                images: selected_scenes,
-                preamble: "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + target_stim.prompt + "</p></br>" +  instruction, 
+                images: images_to_display,
+                preamble: "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + trial_stim.prompt + "</p></br>" +  instruction, 
                 prompt: "",
                 labels: response_options,
                 highlighted_image_index: index,
@@ -853,46 +743,51 @@ function make_test_trial(target_content_type) {
                         qud: qud_assignment,
                         response_format: "slider",
                         block: "test",
-                        training_trial_counter: "na",
-                        test_trial_counter: ++test_trial_counter, // set to whatever value this has been set to after looping through 
-                        // trial building function below
-                        target_truth_value: target_truth_value, // seems to work even when name is the same for both
-                        target_content_type: target_content_type, // seems to work even when name is the same for both
-                        linguistic_prompt: target_stim.prompt, 
+                        training_trial_counter: "NA",
+                        test_trial_counter: ++test_trial_counter,
+                        target_truth_value: target_truth_value,
+                        all_TVs: all_TVs,
+                        target_content_type: target_content_type, 
+                        linguistic_prompt: trial_stim.prompt, 
                         target_image: target_image_filename,
-                        //filler_images_truth_values: currently this info is only in the filename, so not sure how best to access this! 
-                        //could be done from the csv in data processing, although tidiest if it's already saved in csv perhaps?
-                        images_in_order: selected_scenes, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                        images_in_order: images_to_display, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
                     };
                 },
                 on_finish: function (data) {
                     save_pragdep_data_line(data); //save the trial data
                 },
             };
-            //console.log(slider_trial);
             return slider_trial;
         }
     }
 }
 
-// build the trials according to the array of content types made at start of experiment.
-// As this array was randomly shuffled, the randomisation has already happened so this 
-// code only loops through that array and pushes each trial into test_trials, which then
-// goes in the timeline at the end 
+/******************************************************************************/
+/*** Create the stimuli list **************************************************/
+/******************************************************************************/
+
+// create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
+// the test trials will be built and thereby presented (i.e. the randomisation of trial order happens already here)
+// This way can easily adjust number of total trials up or down (and keep an equal number of each content type)
+var content_types = ["con", "arc", "ana", "def_ex", "def_un", "only", "scalar", "numeral"];
+
+//
+// NEXT LINE CONTROLS HOW MANY TRIALS EACH PARTICIPANT SEES: 
+// 8 content types * parameter below. 
+// E.g., with parameter 3 each participant will see 3 of each = 24 test trials
+//
+
+// DEV ONLY!! 
+var target_content_types = jsPsych.randomization.repeat(content_types, 1); 
+
+// var target_content_types = jsPsych.randomization.repeat(content_types, 3); 
+
+// build the trials according to the array of content types made at start of experiment. As this array was randomly shuffled by the jsPsych.randomization.repeat() function, we just loop through that array and push each trial into test_trials, which then goes in the timeline at the end 
 var test_trials = []
 for (target_content_type of target_content_types) {
     single_trial = make_test_trial(target_content_type);
     test_trials.push(single_trial);
 }
-//console.log(test_trials);
-//console.log(test_trial_counter);
-
-// just for having a reference point to check all trials are being shown as expected - REMOVE from non-dev version
-/*var next_trial = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: 'Im the next trial!',
-    choices: ["Correct answer", "Wrong answer"]
-}*/
 
 /******************************************************************************/
 /*** Preload ******************************************************************/
@@ -928,6 +823,7 @@ var write_headers = {
         \"test_trial_count\",\
         \"trial_index\",\
         \"target_truth_value\",\
+        \"all_TVs\",\
         \"target_content_type\",\
         \"linguistic_prompt\",\
         \"target_image\",\
@@ -962,7 +858,7 @@ var write_survey_headers = {
         \"feedback\"\n" 
       );
     },
-  };
+};
 
 /******************************************************************************/
 /*** Instruction trials *******************************************************/
@@ -1099,10 +995,9 @@ var demographics_and_feedback = {
                 <p style='text-align:left'>Do you have any comments about this experiment?<br> \
                 <input name='feedback' type='text'></p>",
     on_finish: function (data) {
-        //console.log(data); //let me see the data in the console
-        save_survey_line(data); //save the survey data
+        save_survey_line(data); // save the survey data
     },
-  };
+};
 
 /******************************************************************************/
 /*** Build the full timeline **************************************************/
@@ -1124,8 +1019,5 @@ var full_timeline = [].concat(
 /******************************************************************************/
 /*** Run the timeline *********************************************************/
 /******************************************************************************/
-
-// this will change if reading from csv, see confederate_priming_readfromcsv.js
-// but currently using this method 
 
 jsPsych.run(full_timeline);
