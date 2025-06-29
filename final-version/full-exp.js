@@ -115,6 +115,7 @@ function save_pragdep_data_line(data) {
         data.response,
         data.time_elapsed,
         data.rt,
+        data.stimulus
     ];
 
     // add quotation marks around each element that is saved to avoid splitting prompts that have commas
@@ -381,6 +382,7 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3) {
                 target_image: target_filename,
                 images_in_order: images, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
                 // NOTE Not really necessary for training block, but might as well save it
+                stimulus: "NA"
             };
         },
         on_finish: function (data) {
@@ -416,7 +418,8 @@ function make_training_trial(prompt, target, filler_1, filler_2, filler_3) {
                 qud: "NA",
                 linguistic_prompt: prompt, 
                 target_image: target_filename,
-                images_in_order: images, 
+                images_in_order: images,
+                stimulus: "NA" 
             };
         },
         on_finish: function (data) {
@@ -582,7 +585,7 @@ function make_test_trial(target_content_type) {
 
     // Extract the qud that has been assigned from the target stimulus
     var qud = trial_stim[qud_assignment]; 
-    images_to_display = [];
+    var images_to_display = [];
     // set the highlighted image index and preamble depending on condition assignment 
     if (condition_assignment == "likelihood") {
         index = 4; // as images are 0-3, this makes there be no highlighted image for likelihood trials
@@ -642,13 +645,12 @@ function make_test_trial(target_content_type) {
                         block: "test",
                         training_trial_counter: "NA",
                         test_trial_counter: ++test_trial_counter, 
-                        // set to whatever value this has been set to after looping through trial building function below
                         target_truth_value: target_truth_value, 
                         all_TVs: all_TVs,
-                        target_content_type: target_content_type, 
-                        linguistic_prompt: trial_stim.prompt, 
-                        target_image: images_to_display[0],
+                        target_content_type: target_content_type,
+                        target_image: target_image_filename,
                         images_in_order: images_to_display, // saves the filenames in the order they were presented in a trial
+                        stimulus: trial_stim.prompt_name
                     };
                 },
                 on_finish: function (data) {
@@ -679,9 +681,9 @@ function make_test_trial(target_content_type) {
                         target_truth_value: target_truth_value, 
                         all_TVs: all_TVs,
                         target_content_type: target_content_type,
-                        linguistic_prompt: trial_stim.prompt, 
                         target_image: target_image_filename,
                         images_in_order: images_to_display, 
+                        stimulus: trial_stim.prompt_name
                     };
                 },
                 on_finish: function (data) {
@@ -712,12 +714,13 @@ function make_test_trial(target_content_type) {
                         block: "test",
                         training_trial_counter: "NA",
                         test_trial_counter: ++test_trial_counter, 
-                        target_truth_value: target_truth_value, 
+                        target_truth_value: target_truth_value,
+                        all_TVs: all_TVs, 
                         target_content_type: target_content_type, 
-                        linguistic_prompt: trial_stim.prompt, 
                         target_image: target_image_filename,
                         images_in_order: images_to_display, 
                         // saves the filenames in the order they were presented in a trial
+                        stimulus: trial_stim.prompt_name
                     };
                 },
                 on_finish: function (data) {
@@ -747,10 +750,10 @@ function make_test_trial(target_content_type) {
                         test_trial_counter: ++test_trial_counter,
                         target_truth_value: target_truth_value,
                         all_TVs: all_TVs,
-                        target_content_type: target_content_type, 
-                        linguistic_prompt: trial_stim.prompt, 
+                        target_content_type: target_content_type,
                         target_image: target_image_filename,
-                        images_in_order: images_to_display, // saves the filenames in the order they were presented in a trial, i.e. the shuffled order
+                        images_in_order: images_to_display, 
+                        stimulus: trial_stim.prompt_name
                     };
                 },
                 on_finish: function (data) {
@@ -825,7 +828,6 @@ var write_headers = {
         \"target_truth_value\",\
         \"all_TVs\",\
         \"target_content_type\",\
-        \"linguistic_prompt\",\
         \"target_image\",\
         \"qud\",\
         \"images_in_presentation_order_0\",\
@@ -834,7 +836,8 @@ var write_headers = {
         \"images_in_presentation_order_3\",\
         \"response\",\
         \"time_elapsed\",\
-        \"rt\"\n" 
+        \"rt\"\n",
+        \"stimName\"\n",
       );
     },
   };
