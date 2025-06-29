@@ -195,7 +195,7 @@ var stims = [
     content_type: "scalar", 
     prompt: "Some of the circles are green.",
     prompt_name: "scalar1",
-    qud1: "Are any of the circles green?", 
+    qud1: "Are some of the circles green?", 
     qud2: "Are all of the circles green?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
@@ -204,7 +204,7 @@ var stims = [
     content_type: "scalar", 
     prompt: "Some of the shapes are blue.",
     prompt_name: "scalar2",
-    qud1: "Are any of the shapes blue?", 
+    qud1: "Are some of the shapes blue?", 
     qud2: "Are all of the shapes blue?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
@@ -213,7 +213,7 @@ var stims = [
     content_type: "scalar", 
     prompt: "Some of the shapes are squares.",
     prompt_name: "scalar3",
-    qud1: "Is at least one the shapes squares?", 
+    qud1: "Are some of the shapes squares?", 
     qud2: "Are all of the shapes squares?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""

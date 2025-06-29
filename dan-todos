@@ -6,6 +6,8 @@ check all QUDs
 
 run through each condition and check for bugs, look at output data
 
+don't record linguistic prompt
+
 =======
 
 before running:

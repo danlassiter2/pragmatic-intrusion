@@ -108,7 +108,7 @@ function save_pragdep_data_line(data) {
         data.target_truth_value,
         data.all_TVs,
         data.target_content_type,
-        data.linguistic_prompt,
+        //data.linguistic_prompt,
         data.target_image,
         data.qud,
         ...data.images_in_order, // saves all images in the presented order (0-3). The ... is called spread, is applied within another array to make them into elements in the top level array (instead of a nested array). Ex: [...[1,2],3]=[1,2,3]. Avoids issue with the quotation loop below, as would otherwise apply "" around the whole array images_in_order (and we want this array to be split for readability in the csv file later)
@@ -218,7 +218,7 @@ var qud_global = jsPsych.randomization.sampleWithoutReplacement(["yes", "yes", "
 // Set the text and names for the response options and the instructions in a trial based on response format, condition assignment and qud assignment determined above, to pass to trial building function).
 // if the response format is radio, set these values for each of the conditions:
 // (note that likelihood is not included here as we are not doing binary likelihood trials) 
-// NEW: added conditionals for QUDs here - i.e. if qud_global is 'no', follow Vilde's setup, else use "How true is the response above" for instruction 
+// NEW: if qud_global is 'no', follow pilot setup, else use "How true is the response above" for instruction 
 if (qud_global == "no") {    
     if (responseformat_assignment == "radio") { 
         if (condition_assignment == "truth") {
@@ -226,13 +226,13 @@ if (qud_global == "no") {
                 {name: "truth", text: "True"}, 
                 {name: "truth", text: "False"}
                 ];
-            instruction = "<p><em>For the highlighted card, is the description above true?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, is the description above true?</em></p>"; 
             } else {
             response_options = [  
                 {name: "acceptability", text: "Acceptable"},
                 {name: "acceptability", text: "Unacceptable"}
                 ];
-            instruction = "<p><em>For the highlighted card, is the description above acceptable?</em></p>"; //NEW: removed "following" and added "above"
+            instruction = "<p><em>For the highlighted card, is the description above acceptable?</em></p>"; 
             }
     // or else, the response format is slider, and these values are chosen:
     } else { 
@@ -624,144 +624,82 @@ function make_test_trial(target_content_type) {
     }
  
     // put trial together using either the custom radio button plugin or the custom slider plugin, dependent on response format assignment
-    if (qud_assignment == "qud4") { 
-    // NEW: if qud4 is assigned, the "question" and "response" bits are not inserted
-        if (responseformat_assignment== "radio") {
-            // make trials using custom radio button plugin
-            var trial = {
-                type: jsPsychImageArrayMultiChoice,
-                images: images_to_display, 
-                preamble: qud + "</p><br>" +  trial_stim.prompt + "</p><br>" +  instruction, 
-                prompt: "",
-                labels: response_options,
-                highlighted_image_index: index,
-    
-                //at the start of the trial, make a note of all relevant info to be saved
-                on_start: function (trial) {
-                    trial.data = {
-                        condition: condition_assignment,
-                        qud: qud_assignment, 
-                        response_format: "radio",
-                        block: "test",
-                        training_trial_counter: "NA",
-                        test_trial_counter: ++test_trial_counter, 
-                        target_truth_value: target_truth_value, 
-                        all_TVs: all_TVs,
-                        target_content_type: target_content_type,
-                        target_image: target_image_filename,
-                        images_in_order: images_to_display, // saves the filenames in the order they were presented in a trial
-                        stimulus: trial_stim.prompt_name
-                    };
-                },
-                on_finish: function (data) {
-                    save_pragdep_data_line(data); //save the trial data
-                },
-            };
-            return trial;
-        } else { 
-            // else make trials using custom slider plugin
-            var slider_trial = {
-                type: jsPsychImageArraySliderResponse,
-                images: images_to_display,
-                preamble: qud + "</p><br>" +  trial_stim.prompt + "</p><br>" +  instruction, 
-                prompt: "",
-                labels: response_options,
-                highlighted_image_index: index,
-               // slider_width: // can set this in pixels if desired
-    
-                //at the start of the trial, make a note of all relevant info to be saved
-                on_start: function (slider_trial) {
-                    slider_trial.data = {
-                        condition: condition_assignment,
-                        qud: qud_assignment,
-                        response_format: "slider",
-                        block: "test",
-                        training_trial_counter: "NA",
-                        test_trial_counter: ++test_trial_counter, 
-                        target_truth_value: target_truth_value, 
-                        all_TVs: all_TVs,
-                        target_content_type: target_content_type,
-                        target_image: target_image_filename,
-                        images_in_order: images_to_display, 
-                        stimulus: trial_stim.prompt_name
-                    };
-                },
-                on_finish: function (data) {
-                    save_pragdep_data_line(data); //save the trial data
-                },
-            };
-            //console.log(slider_trial);
-            return slider_trial;
-        }     
-    } else { 
-    //NEW: if qud1-3 is assigned, the "question" and "response" bits are inserted
-        if (responseformat_assignment== "radio") {
-            // make trials using custom radio button plugin
-            var trial = {
-                type: jsPsychImageArrayMultiChoice,
-                images: images_to_display, 
-                preamble: "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + trial_stim.prompt + "</p></br>" +  instruction, 
-                prompt: "",
-                labels: response_options,
-                highlighted_image_index: index,
-    
-                //at the start of the trial, make a note of all relevant info to be saved
-                on_start: function (trial) {
-                    trial.data = {
-                        condition: condition_assignment,
-                        qud: qud_assignment,
-                        response_format: "radio",
-                        block: "test",
-                        training_trial_counter: "NA",
-                        test_trial_counter: ++test_trial_counter, 
-                        target_truth_value: target_truth_value,
-                        all_TVs: all_TVs, 
-                        target_content_type: target_content_type, 
-                        target_image: target_image_filename,
-                        images_in_order: images_to_display, 
-                        // saves the filenames in the order they were presented in a trial
-                        stimulus: trial_stim.prompt_name
-                    };
-                },
-                on_finish: function (data) {
-                    save_pragdep_data_line(data); //save the trial data
-                },
-            };
-            return trial;
-        } else { 
-            // else make trials using custom slider plugin
-            var slider_trial = {
-                type: jsPsychImageArraySliderResponse,
-                images: images_to_display,
-                preamble: "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + trial_stim.prompt + "</p></br>" +  instruction, 
-                prompt: "",
-                labels: response_options,
-                highlighted_image_index: index,
-               // slider_width: // can set this in pixels if desired
-    
-                //at the start of the trial, make a note of all relevant info to be saved
-                on_start: function (slider_trial) {
-                    slider_trial.data = {
-                        condition: condition_assignment,
-                        qud: qud_assignment,
-                        response_format: "slider",
-                        block: "test",
-                        training_trial_counter: "NA",
-                        test_trial_counter: ++test_trial_counter,
-                        target_truth_value: target_truth_value,
-                        all_TVs: all_TVs,
-                        target_content_type: target_content_type,
-                        target_image: target_image_filename,
-                        images_in_order: images_to_display, 
-                        stimulus: trial_stim.prompt_name
-                    };
-                },
-                on_finish: function (data) {
-                    save_pragdep_data_line(data); //save the trial data
-                },
-            };
-            return slider_trial;
+    if (responseformat_assignment== "radio") {
+        // make trials using custom radio button plugin
+        var trial = {
+            type: jsPsychImageArrayMultiChoice,
+            images: images_to_display, 
+            prompt: "",
+            labels: response_options,
+            highlighted_image_index: index,
+            //at the start of the trial, make a note of all relevant info to be saved
+            on_start: function (trial) {
+                trial.data = {
+                    condition: condition_assignment,
+                    qud: qud_assignment,
+                    linguistic_prompt: trial_stim.prompt, 
+                    response_format: "radio",
+                    block: "test",
+                    training_trial_counter: "NA",
+                    test_trial_counter: ++test_trial_counter, 
+                    target_truth_value: target_truth_value,
+                    all_TVs: all_TVs, 
+                    target_content_type: target_content_type, 
+                    target_image: target_image_filename,
+                    images_in_order: images_to_display, 
+                    // saves the filenames in the order they were presented in a trial
+                    stimulus: trial_stim.prompt_name
+                };
+            },
+            on_finish: function (data) {
+                save_pragdep_data_line(data); //save the trial data
+            },
+        };
+        // set up the appropriate preamble - depending on whether there is a QUD (qud1, qud2, qud3) or not (qud4)
+        if (qud_assignment == 'qud4') {
+            trial.preamble = qud + "</p><br>" +  trial_stim.prompt + "</p><br>" +  instruction;
+        } else {
+            trial.preamble = "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + trial_stim.prompt + "</p></br>" +  instruction;
         }
+        return trial;
+    } else { 
+        // else make trials using custom slider plugin
+        var slider_trial = {
+            type: jsPsychImageArraySliderResponse,
+            images: images_to_display,
+            labels: response_options,
+            highlighted_image_index: index,
+            prompt: "",
+            // slider_width: // can set this in pixels if desired
+
+            //at the start of the trial, make a note of all relevant info to be saved
+            on_start: function (slider_trial) {
+                slider_trial.data = {
+                    condition: condition_assignment,
+                    qud: qud_assignment,
+                    linguistic_prompt: trial_stim.prompt,
+                    response_format: "slider",
+                    block: "test",
+                    training_trial_counter: "NA",
+                    test_trial_counter: ++test_trial_counter,
+                    target_truth_value: target_truth_value,
+                    all_TVs: all_TVs,
+                    target_content_type: target_content_type,
+                    target_image: target_image_filename,
+                    images_in_order: images_to_display, 
+                    stimulus: trial_stim.prompt_name
+                };
+            },
+            on_finish: function (data) {
+                save_pragdep_data_line(data); //save the trial data
+            },
+        };
+        if (qud_assignment == 'qud4') {
+            slider_trial.preamble = qud + "</p><br>" +  trial_stim.prompt + "</p><br>" +  instruction;
+        } else {
+            slider_trial.preamble = "Question:&nbsp" + qud + "</p></br>" + "Response:&nbsp" + trial_stim.prompt + "</p></br>" +  instruction;
+        }
+        return slider_trial;
     }
 }
 
@@ -769,9 +707,9 @@ function make_test_trial(target_content_type) {
 /*** Create the stimuli list **************************************************/
 /******************************************************************************/
 
-// create array with n repetitions of each of the 6 content types in random order - this will determine the order in which 
+// create array with n repetitions of each of the 8 content types in random order - this will determine the order in which 
 // the test trials will be built and thereby presented (i.e. the randomisation of trial order happens already here)
-// This way can easily adjust number of total trials up or down (and keep an equal number of each content type)
+
 var content_types = ["con", "arc", "ana", "def_ex", "def_un", "only", "scalar", "numeral"];
 
 //
@@ -820,27 +758,31 @@ var write_headers = {
         this_participant_filename,
         "\"participant_id\",\
         \"condition\",\
+        \"qud\",\
         \"response_format\",\
         \"block\",\
         \"training_trial_count\",\
         \"test_trial_count\",\
         \"trial_index\",\
-        \"target_truth_value\",\
-        \"all_TVs\",\
+        \"target_TV\",\
+        \"TV1\",\
+        \"TV2\",\
+        \"TV3\",\
+        \"TV4\",\
         \"target_content_type\",\
+//      \"prompt\",\
         \"target_image\",\
-        \"qud\",\
         \"images_in_presentation_order_0\",\
         \"images_in_presentation_order_1\",\
         \"images_in_presentation_order_2\",\
         \"images_in_presentation_order_3\",\
+        \"stimName\",\
         \"response\",\
         \"time_elapsed\",\
-        \"rt\"\n",
-        \"stimName\"\n",
-      );
+        \"rt\"\n"
+        );
     },
-  };
+};
 
 /******************************************************************************/
 /*** Write headers for survey data file ***************************************/
