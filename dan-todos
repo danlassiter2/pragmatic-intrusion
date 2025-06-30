@@ -1,26 +1,14 @@
+5 dependent measure conditions
+4 QUD types
+8 content types
+-----
+160 total
 
+if we want 50 measures per, need 8000 measurements
 
-check all stimuli to make sure coded correctly
+with 500 participants, that means 16 per participant 
+= 2 of each content type
 
-check all QUDs
-
-=======
+price it for 6 minutes = £1.20 at £12/hr
 
 before running:
-
-check estimate of time in info sheet
-
-REDIRECT, run 5 ppl to check before going live
-in on_finish function
-
-
-can pay £1.2 per participant. or, need 2 exp versions: lhood and other. 
-        in pilot: lhood took 
-              Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-            3.624   5.280   6.477   8.094   8.551  26.554
-        vs others
-               Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-            1.998   3.471   4.307   5.153   5.770  32.659
-        so, pay lhood participants more - at $9/hr that should be
-            lhood: £1.2   if 8 minutes
-            others: £0.90 if 6 minutes
