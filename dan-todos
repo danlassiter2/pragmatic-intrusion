@@ -4,19 +4,15 @@ check all stimuli to make sure coded correctly
 
 check all QUDs
 
-run through each condition and check for bugs, look at output data
-
-don't record linguistic prompt
-
 =======
 
 before running:
 
 check estimate of time in info sheet
 
-make sure all relevant variables are being recorded
-    notably, QUD manipulation in by-trial data
-    if global QUD = none, then make every trial's data 'none'
+REDIRECT, run 5 ppl to check before going live
+in on_finish function
+
 
 can pay £1.2 per participant. or, need 2 exp versions: lhood and other. 
         in pilot: lhood took 

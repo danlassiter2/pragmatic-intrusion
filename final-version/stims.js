@@ -12,14 +12,14 @@ var stims = [
     content_type: "con", 
     prompt: "The circle is green and the square is next to the triangle.",
     prompt_name: "con2",
-    qud1: "What color is the triangle?", 
-    qud2: "Where is the circle?",
+    qud1: "What color is the circle?", 
+    qud2: "Where is the square?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
   { 
     content_type: "con", 
-    prompt: "The square is pink and is left of the circle.",
+    prompt: "The square is pink and it is left of the circle.",
     prompt_name: "con3",
     qud1: "What color is the square?", 
     qud2: "Where is the square?",
@@ -67,8 +67,8 @@ var stims = [
     content_type: "only", 
     prompt: "Only the square is green.",
     prompt_name: "only1",
-    qud1: "What color is the square?", 
-    qud2: "Besides the square, is any other shape green?",
+    qud1: "Besides the square, is any other shape green?",
+    qud2: "What color is the square?", 
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -76,8 +76,8 @@ var stims = [
     content_type: "only", 
     prompt: "Only the triangle is blue.",
     prompt_name: "only2",
-    qud1: "What color is the triangle?", 
-    qud2: "Besides the triangle, is any other shape blue?",
+    qud1: "Besides the triangle, is any other shape blue?",
+    qud2: "What color is the triangle?", 
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -85,8 +85,8 @@ var stims = [
     content_type: "only", 
     prompt: "Only the circle is pink.",
     prompt_name: "only3",
-    qud1: "What color is the circle?",  
-    qud2: "Besides the circle, is any other shape pink?",
+    qud1: "Besides the circle, is any other shape pink?",
+    qud2: "What color is the circle?",  
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -106,8 +106,8 @@ var stims = [
     content_type: "arc", 
     prompt: "The square, which is left of the circle, is pink.",
     prompt_name: "arc2",
-    qud1: "Where is the circle?", 
-    qud2: "What color is the circle?",
+    qud1: "What color is the square?", 
+    qud2: "Where is the square?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -115,8 +115,8 @@ var stims = [
     content_type: "arc", 
     prompt: "The triangle, which is green, is left of the square.",
     prompt_name: "arc3",
-    qud1: "Where is the circle?", 
-    qud2: "What color is the circle?",
+    qud1: "Where is the triangle?", 
+    qud2: "What color is the triangle?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -140,7 +140,7 @@ var stims = [
     prompt: "The pink triangle is right of the square.",
     prompt_name: "def_ex2",
     qud1: "Where is the pink triangle?", 
-    qud2: "What color is the triangle?",
+    qud2: "Is there a pink triangle?",
     qud3: "Is there a blue circle?", 
     qud4: ""
   },
@@ -149,7 +149,7 @@ var stims = [
     prompt: "The green square is left of the circle.",
     prompt_name: "def_ex3",
     qud1: "Where is the green square?", 
-    qud2: "What color is the square?",
+    qud2: "Is there a green square?",
     qud3: "Is there a blue circle?", 
     qud4: ""
   },
@@ -181,7 +181,7 @@ var stims = [
     prompt: "The blue square is right of the circle.",
     prompt_name:  "def_un3",
     qud1: "Where is the blue square?", 
-    qud2: "Is there more than one square?",
+    qud2: "Is there more than one blue square?",
     qud3: "What can you tell me about the shapes?", 
     qud4: ""
   },
@@ -220,7 +220,7 @@ var stims = [
   },
    // numeral items: one -> exactly one
   // tt = exactly one
-  // tf = two items satisfy 
+  // tf = 2+ items satisfy 
   // ft = IMPOSSIBLE - if 'at least one' is false, then 'exactly one' also false
   // ff = zero items satisfy
     { 
