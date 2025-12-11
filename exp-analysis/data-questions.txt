@@ -1,0 +1,32 @@
+Data questions:
+
+      1. Basic: Do truth and acceptability judgments come apart, as the truth=sem, acc=prag hypothesis would have it?
+            # this hypothesis is widely assumed, rarely spelled out expicitly but see S-O et al and (? Lopez-Astorga & J-L? / various other claims in the MM lit) and it's implicit in the argumentation of Douven et al. on both prob and truth of conditionals
+
+
+      2. do binary vs slider responses differ interestingly?
+         -do ppl use the intermediate range, or are the slider responses bimodal with similar proportions?
+         -if so, does use of intermediate range correlate with falsity of secondary content?
+
+      answers to Q1 and Q2: the choice of measure (truth vs acc) and response format (binary vs slider) hardly matters at all. Slider responses are largely categorical and participants mostly agree. When slider response are intermediate in means, this appears to be driven by (binary) disagreement among participants.
+
+            check whether there are more intermediate response in some conditions than in others, e.g., with some content types or with some QUDs?
+                  yes - it's complicated, see graphs. interestingly, most intermediate responses are with ff
+
+More theoretically-driven questions:
+
+      3. in the baseline no-QUD condition, do content types differ in terms of how false secondary content matters (a lot ~ conjunction, a little, not at all ~ ignored a la semantic-only judgments)?
+        options: 
+           a. truth-only: secondary content makes no difference to truth and probability judgments; should matter for acceptability judgments 
+           b. no differences: primary and secondary content are treated as equivalent, so everything is like conjunction
+                # hinted at by Kroll/Rysling result, but subtle for SI work + Cremers et al
+          c. it's complicated: how the 2ndary dimension matters depends on content type. this is hinted at in previous work incl Kroll/Rysling and e.g. Beaver/Coppock on definiteness and more generally Tonhauser et al. 2010 on differences among presuppositions
+
+      4. when we introduce QUD judgments: how does QUD influence effect of primary vs 2ndary content?
+          a. QUD doesn't matter
+          b. relevance dominant: QUD determines which dimension matters for judgment
+          c. it's complicated: QUD should shift baseline results toward the emphasized dimension ...
+                        (this is more or less what Kroll/Rysling found)
+             but not deterministically, and in a way that depends on content type 
+
+      5. Can we predict likelihood ratings directly from truth judgments, across QUD types? i.e., is likelihood = probability of truth, where truth is whatever you get as a binary judgment in the corresponding  condition

@@ -707,7 +707,7 @@ var content_types = ["con", "arc", "ana", "def_ex", "def_un", "only", "scalar", 
 //
 // NEXT LINE CONTROLS HOW MANY TRIALS EACH PARTICIPANT SEES: 
 // 8 content types * parameter below. 
-// E.g., with parameter 3 each participant will see 3 of each = 24 test trials
+// E.g., with parameter 2 each participant will see 2 of each = 16 test trials
 //
 
 var target_content_types = jsPsych.randomization.repeat(content_types, 2); 
