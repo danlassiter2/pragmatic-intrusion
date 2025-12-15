@@ -222,6 +222,7 @@ var stims = [
   // tt = exactly one
   // tf = 2+ items satisfy 
   // ft = IMPOSSIBLE - if 'at least one' is false, then 'exactly one' also false
+  //      update 15-12-25: if 2ndary content is 'no more than one', than ff is imposible and ft = 'one & more than one'  - initially coded as ff - is possible 
   // ff = zero items satisfy
     { 
     content_type: "numeral", 
